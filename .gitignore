@@ -1,0 +1,14 @@
+# Locked for v1: kept local until they're unlocked on the hub
+bayes.html
+lln.html
+clt.html
+
+# Not part of the site
+_drafts/
+templates/
+.claude/
+prompt.md
+
+# Media
+*.gif
+*.mp4

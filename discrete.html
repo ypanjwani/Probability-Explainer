@@ -1,0 +1,2410 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discrete Distributions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #fbfaf8;
+    --ink: #1d1b18;
+    --muted: #6b655c;
+    --line: #e7e1d7;
+    --accent: #d9480f;
+    --accent-soft: #fde8dc;
+    --bar: #2f5d8a;
+    --bar-soft: #e3ecf5;
+    --bar-hover: #d9480f;
+    --qz-good: #2b8a3e;
+    --qz-good-soft: #e6f4ea;
+    --qz-bad: #c92a2a;
+    --qz-bad-soft: #fdeaea;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.7 Inter, system-ui, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 16px 96px; }
+
+  /* Sticky stage nav */
+  nav {
+    position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.88);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+  }
+  nav .in { max-width: 760px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  nav .in::-webkit-scrollbar { display: none; }
+  nav a {
+    font: 500 13px Inter, sans-serif; color: var(--muted); text-decoration: none;
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  nav a:hover { color: var(--ink); background: var(--surface); }
+  nav a.back { color: var(--ink); font-weight: 600; border-right: 1px solid var(--line); border-radius: 0; margin-right: 4px; }
+  nav a.on { color: var(--accent); background: var(--accent-soft); }
+
+  .eyebrow {
+    font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  h1 {
+    font: 600 clamp(2.2rem, 6vw, 3.4rem)/1.1 Fraunces, Georgia, serif;
+    margin: 14px 0 18px; letter-spacing: -.02em;
+  }
+  section { padding-top: 40px; }
+  section + section { border-top: 1px solid var(--line); margin-top: 56px; }
+  h2 { font: 600 1.9rem/1.2 Fraunces, Georgia, serif; margin: 10px 0 14px; }
+  h3 { font: 600 1.25rem/1.3 Fraunces, Georgia, serif; margin: 40px 0 10px; }
+  .tagline { font: italic 400 1.2rem/1.4 Fraunces, Georgia, serif; color: var(--muted); margin: -6px 0 18px; }
+  .lede { font-size: 1.15rem; color: var(--muted); margin: 0; }
+  p { margin: 0 0 16px; }
+  em.key { font-style: normal; background: var(--accent-soft); padding: 1px 6px; border-radius: 4px; }
+  code { font-family: "JetBrains Mono", monospace; font-size: .88em; }
+
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 24px 0; }
+  .rule { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .rule b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .rule > span { font-size: 14px; color: var(--muted); line-height: 1.5; display: block; }
+  .rule code { font-size: 13px; color: var(--accent); }
+
+  .example {
+    border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; margin: 20px 0;
+    color: var(--muted); font-size: 15px;
+  }
+  .example b { color: var(--ink); }
+
+  /* Interactive card */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin: 24px 0; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .card-title { font-weight: 600; }
+  .hint { font-size: 14px; color: var(--muted); }
+  .sub { font: 500 12px "JetBrains Mono", monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 18px 0 0; }
+
+  svg.chart { width: 100%; height: auto; display: block; margin-top: 10px; touch-action: none; user-select: none; }
+  .bar { fill: var(--bar); transition: fill .15s; }
+  .bar.hl { fill: var(--accent); }
+  .bar.dim { fill: var(--bar-soft); }
+  .drag .hit { cursor: ns-resize; }
+  .bar-g:hover .bar, .bar-g.active .bar { fill: var(--bar-hover); }
+  .handle { fill: #fff; stroke: var(--bar); stroke-width: 2; pointer-events: none; }
+  .bar-g:hover .handle, .bar-g.active .handle { stroke: var(--bar-hover); }
+  .lbl { font: 500 12px "JetBrains Mono", monospace; fill: var(--muted); }
+  .val { font: 500 11px "JetBrains Mono", monospace; fill: var(--ink); }
+  .grid { stroke: var(--line); }
+  .base { stroke: #cfc7ba; }
+  .hit { fill: transparent; }
+  .sd-band { fill: var(--accent); opacity: .07; }
+  .mean-line { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .fulcrum { fill: var(--ink); }
+  .mean-lbl { font: 600 12px "JetBrains Mono", monospace; fill: var(--ink); }
+  .emp { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+  .step { stroke: var(--bar); stroke-width: 2.5; fill: none; }
+  .jump { stroke: var(--bar); stroke-width: 1; stroke-dasharray: 3 3; opacity: .5; }
+  .dot { fill: var(--bar); }
+  .odot { fill: #fff; stroke: var(--bar); stroke-width: 2; }
+  .step.hl, .dot.hl { stroke: var(--accent); fill: var(--accent); }
+  .step.hl { fill: none; }
+
+  /* Controls */
+  .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 24px; margin: 6px 0 4px; }
+  .ctl label { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+  .ctl label b { font: 600 14px "JetBrains Mono", monospace; color: var(--ink); }
+  input[type=range] { width: 100%; accent-color: var(--accent); margin: 6px 0 0; }
+
+  .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font: 500 13px "JetBrains Mono", monospace; padding: 5px 11px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line); color: var(--ink);
+  }
+  .chip.acc { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    font: 500 14px Inter, sans-serif; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  .nin { display: inline-flex; }
+  .nin input {
+    width: 96px; font: 500 14px "JetBrains Mono", monospace; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-right: 0; border-radius: 8px 0 0 8px; padding: 8px 10px;
+  }
+  .nin input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .nin button { border-radius: 0 8px 8px 0; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { filter: brightness(1.08); color: #fff; }
+
+  .legend { display: flex; gap: 18px; font-size: 13px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .legend i { display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .lg-bar { width: 12px; height: 12px; background: var(--bar); border-radius: 2px; }
+  .lg-emp { width: 16px; height: 3px; background: var(--accent); border-radius: 2px; }
+  .lg-mean { width: 16px; border-top: 2px dashed var(--ink); }
+  .lg-ovl { width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2.5px solid var(--accent); }
+  .ovl { fill: #fff; stroke: var(--accent); stroke-width: 2.5; }
+
+  /* Poisson timeline */
+  .tl-line { stroke: var(--line); stroke-width: 2; }
+  .tl-tick { stroke: #cfc7ba; }
+  .tl-ev { fill: var(--accent); }
+  .tl-ev.new { animation: pop .35s ease-out; transform-box: fill-box; transform-origin: center; }
+  @keyframes pop { from { transform: scale(2.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* Family map */
+  .fm-node rect { fill: #fff; stroke: var(--line); stroke-width: 1.5; transition: all .15s; }
+  .fm-node text { font: 600 14px Inter, sans-serif; fill: var(--ink); pointer-events: none; }
+  .fm-node .s { font: 500 11px "JetBrains Mono", monospace; fill: var(--muted); }
+  .fm-node { cursor: pointer; }
+  .fm-node:hover rect { stroke: var(--accent); }
+  .fm-node.on rect { stroke: var(--accent); fill: var(--accent-soft); stroke-width: 2; }
+  .fm-node.ext rect { stroke-dasharray: 5 4; fill: var(--surface); }
+  .fm-edge { stroke: #c9c1b4; stroke-width: 1.6; fill: none; transition: stroke .15s; }
+  .fm-edge.on { stroke: var(--accent); stroke-width: 2.4; }
+  .fm-elbl { font: 500 11.5px "JetBrains Mono", monospace; fill: var(--muted); }
+  .fm-elbl.on { fill: var(--accent); }
+  .fm-elbg { fill: var(--surface); }
+  #fm-arrow path { fill: #c9c1b4; }
+  #fm-arrow-on path { fill: var(--accent); }
+  .fm-info { min-height: 92px; border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; font-size: 15px; }
+  .fm-info h4 { margin: 0 0 4px; font: 600 1.1rem Fraunces, Georgia, serif; }
+  .fm-info a { color: var(--accent); font-weight: 500; text-decoration: none; }
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 640px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface); }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  td.ex { color: var(--muted); }
+
+  /* Formula box */
+  .formula {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; margin: 20px 0;
+  }
+  .formula > div { padding: 14px 18px; }
+  .formula > div + div { border-left: 1px solid var(--line); background: var(--surface); font-size: 15px; }
+  .formula .t { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .formula .katex-display { margin: .5em 0; }
+  @media (max-width: 600px) {
+    .formula { grid-template-columns: 1fr; }
+    .formula > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  }
+
+  /* Coin */
+  .coin-row { display: flex; align-items: center; gap: 20px; margin: 14px 0 4px; }
+  .coin {
+    width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; flex: none;
+    font: 600 24px "JetBrains Mono", monospace; color: #fff; background: var(--muted);
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,.15);
+  }
+  .coin.s { background: var(--accent); }
+  .coin.f { background: var(--bar); }
+  .coin.spin { animation: spin .5s ease-out; }
+  @keyframes spin { from { transform: rotateY(0) scale(1.1); } to { transform: rotateY(1080deg) scale(1); } }
+
+  .trials { display: flex; flex-wrap: wrap; gap: 5px; min-height: 22px; margin: 14px 0 4px; }
+  .tr {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--line);
+    transition: background .15s, transform .15s;
+  }
+  .tr.s { background: var(--accent); transform: scale(1.1); }
+  .tr.f { background: var(--bar); }
+  .result { font-size: 15px; color: var(--muted); }
+  .result b { color: var(--ink); font-family: "JetBrains Mono", monospace; }
+
+  #tip {
+    position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: #fff;
+    font: 500 12px/1.5 "JetBrains Mono", monospace; padding: 8px 10px; border-radius: 8px;
+    opacity: 0; transition: opacity .1s; max-width: 320px;
+  }
+  .note { font-size: 14px; color: var(--muted); }
+
+  /* Binomial: live shape caption + formula key */
+  .shape-note { font-size: 14px; color: var(--muted); margin-top: 10px; padding: 8px 12px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .shape-note b { color: var(--ink); }
+  .term-key { border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 0 0 20px; }
+  .term-key-title { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+  .term-key-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; align-items: baseline; font-size: 15px; }
+  .term-key-grid > div:nth-child(odd) { text-align: right; white-space: nowrap; }
+  .term-key-grid > div:nth-child(even) { color: var(--muted); }
+
+  /* Worked-examples launcher + sidebar */
+  .ex-launch { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 32px 0 0; }
+  .ex-fab {
+    display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 6px 18px 6px 6px;
+    font-weight: 600; box-shadow: 0 2px 10px rgba(29,27,24,.07);
+  }
+  .ex-fab-dot {
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent); color: #fff; font: 600 13px "JetBrains Mono", monospace;
+  }
+  .ex-scrim {
+    position: fixed; inset: 0; z-index: 30; background: rgba(29,27,24,.35);
+    opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s;
+  }
+  .ex-panel {
+    position: fixed; top: 0; right: 0; z-index: 31; height: 100%; width: min(440px, 100vw);
+    display: flex; flex-direction: column; background: #fff; border-left: 1px solid var(--line);
+    box-shadow: -12px 0 32px rgba(29,27,24,.1);
+    transform: translateX(100%); visibility: hidden; transition: transform .3s ease, visibility .3s;
+  }
+  body.ex-open { overflow: hidden; }
+  body.ex-open .ex-scrim { opacity: 1; visibility: visible; transition: opacity .25s, visibility 0s; }
+  .ex-panel.on { transform: none; visibility: visible; transition: transform .3s ease, visibility 0s; }
+  .ex-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 20px 20px 14px; border-bottom: 1px solid var(--line); }
+  .ex-head h3 { margin: 6px 0 0; }
+  .ex-close { width: 36px; height: 36px; border-radius: 50%; padding: 0; flex: none; }
+  .ex-body { overflow-y: auto; padding: 0 20px 32px; }
+  .ex-item { padding: 22px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 1.6; }
+  .ex-item:last-child { border-bottom: 0; }
+  .ex-item p { margin: 0 0 10px; }
+  .ex-item h4 { font: 600 1.15rem/1.3 Fraunces, Georgia, serif; margin: 4px 0 8px; }
+  .ex-tag { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+  .ex-q { font-weight: 600; }
+  .ex-steps { padding-left: 20px; margin: 0 0 10px; color: var(--muted); }
+  .ex-steps li { margin: 4px 0; }
+  .ex-ans { background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 8px 12px; font: 600 14px "JetBrains Mono", monospace; margin: 0 0 12px; }
+  @media (prefers-reduced-motion: reduce) { .ex-panel, .ex-scrim { transition: none; } }
+
+  /* Quiz: centred modal */
+  .qz-fab .ex-fab-dot { background: var(--bar); }
+  .qz-scrim {
+    position: fixed; inset: 0; z-index: 40; background: rgba(29,27,24,.45);
+    opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s;
+  }
+  .qz-modal {
+    position: fixed; z-index: 41; left: 50%; top: 50%; width: min(600px, calc(100vw - 32px)); max-height: calc(100vh - 32px);
+    display: flex; flex-direction: column; background: #fff; border-radius: 18px; box-shadow: 0 24px 64px rgba(29,27,24,.22);
+    transform: translate(-50%, -46%) scale(.96); opacity: 0; visibility: hidden;
+    transition: transform .28s ease, opacity .2s, visibility .28s;
+  }
+  body.qz-open { overflow: hidden; }
+  body.qz-open .qz-scrim { opacity: 1; visibility: visible; transition: opacity .25s, visibility 0s; }
+  body.qz-open .qz-modal { transform: translate(-50%, -50%); opacity: 1; visibility: visible; transition: transform .28s ease, opacity .2s, visibility 0s; }
+  .qz-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 22px 12px; }
+  .qz-head h3 { margin: 4px 0 0; }
+  .qz-prog { display: flex; gap: 6px; padding: 0 22px; }
+  .qz-prog i { flex: 1; height: 5px; border-radius: 3px; background: var(--line); transition: background .2s; }
+  .qz-prog i.now { background: var(--ink); }
+  .qz-prog i.right { background: var(--qz-good); }
+  .qz-prog i.wrong { background: var(--qz-bad); }
+  .qz-body { overflow-y: auto; padding: 16px 22px 22px; }
+  .qz-num { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .qz-q { font: 600 1.15rem/1.4 Fraunces, Georgia, serif; margin: 6px 0 12px; }
+  .qz-vis { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px 2px; margin: 0 0 14px; }
+  .qz-vis svg { display: block; width: 100%; height: auto; }
+  .qz-vis-note { font-size: 13px; color: var(--muted); text-align: center; margin: 2px 0 6px; }
+  .qz-opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .qz-opt {
+    display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border-radius: 10px;
+    font-size: 15px; transition: border-color .15s, background .15s;
+  }
+  .qz-opt-key {
+    width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    background: var(--surface); border: 1px solid var(--line); font: 600 12px "JetBrains Mono", monospace; color: var(--muted);
+  }
+  .qz-opts.charts { grid-template-columns: repeat(3, 1fr); }
+  .qz-opts.charts .qz-opt { flex-direction: column; align-items: stretch; padding: 8px; }
+  .qz-opts.charts .qz-opt svg { width: 100%; height: auto; display: block; }
+  .qz-opts.locked .qz-opt { cursor: default; pointer-events: none; }
+  .qz-opt.right { border-color: var(--qz-good); background: var(--qz-good-soft); }
+  .qz-opt.right .qz-opt-key { background: var(--qz-good); border-color: var(--qz-good); color: #fff; }
+  .qz-opt.wrong { border-color: var(--qz-bad); background: var(--qz-bad-soft); }
+  .qz-opt.wrong .qz-opt-key { background: var(--qz-bad); border-color: var(--qz-bad); color: #fff; }
+  .qz-opts.locked .qz-opt:not(.right):not(.wrong) { opacity: .55; }
+  .qz-pick { cursor: pointer; }
+  .qz-pick:hover .bar, .qz-pick:focus .bar { fill: var(--bar-hover); }
+  .qz-pick:focus { outline: none; }
+  .bar.qz-right { fill: var(--qz-good); }
+  .bar.qz-wrong { fill: var(--qz-bad); }
+  .qz-unknown { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; }
+  .qz-unknown-lbl { font: 700 22px Fraunces, Georgia, serif; fill: var(--accent); }
+  .qz-flbl { font: 600 11px "JetBrains Mono", monospace; fill: var(--bar); }
+  .qz-fb { border-radius: 10px; padding: 12px 14px; margin: 14px 0 0; font-size: 15px; line-height: 1.55; animation: qz-in .25s ease; }
+  .qz-fb b:first-child { display: block; margin-bottom: 2px; }
+  .qz-fb.right { background: var(--qz-good-soft); }
+  .qz-fb.right b:first-child { color: var(--qz-good); }
+  .qz-fb.wrong { background: var(--qz-bad-soft); }
+  .qz-fb.wrong b:first-child { color: var(--qz-bad); }
+  @keyframes qz-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .qz-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; }
+  .qz-end { text-align: center; padding: 8px 0 4px; }
+  .qz-ring-bg { fill: none; stroke: var(--line); stroke-width: 12; }
+  .qz-ring { fill: none; stroke: var(--accent); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset .9s ease; }
+  .qz-ring-txt { font: 600 34px Fraunces, Georgia, serif; fill: var(--ink); }
+  .qz-ring-sub { font: 500 12px "JetBrains Mono", monospace; fill: var(--muted); }
+  .qz-review { display: flex; flex-direction: column; gap: 6px; text-align: left; margin: 16px 0; }
+  .qz-review div { display: flex; gap: 10px; align-items: baseline; font-size: 14px; color: var(--muted); }
+  .qz-review span { font: 600 13px "JetBrains Mono", monospace; flex: none; }
+  .qz-review .ok { color: var(--qz-good); }
+  .qz-review .no { color: var(--qz-bad); }
+  @media (max-width: 520px) { .qz-opts.charts { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { .qz-modal, .qz-scrim, .qz-ring, .qz-fb { transition: none; animation: none; } }
+</style>
+</head>
+<body>
+<nav><div class="in">
+  <a href="index.html" class="back">← All topics</a>
+  <a href="#basics">0 · Basics</a>
+  <a href="#uniform">1 · Uniform</a>
+  <a href="#bernoulli">2 · Bernoulli</a>
+  <a href="#binomial">3 · Binomial</a>
+  <a href="#negbin">4 · Negative Binomial</a>
+  <a href="#poisson">5 · Poisson</a>
+  <a href="#family">6 · Family map</a>
+</div></nav>
+
+<main>
+  <div class="eyebrow">An interactive explainer</div>
+  <h1>Discrete Probability Distributions</h1>
+  <p class="lede">How chance spreads itself across a handful of countable outcomes, and the few shapes it keeps choosing.</p>
+
+  <!-- ============ STAGE 0 ============ -->
+  <section id="basics">
+    <div class="eyebrow">Stage 0</div>
+    <h2>Foundations</h2>
+    <p class="tagline">What is a discrete distribution?</p>
+    <p>Some questions have answers you can <em class="key">count</em>: the face a die shows, how many heads in 10 flips, how many emails arrive in an hour. You can list every possible answer: 0, 1, 2, 3…</p>
+    <p>A <b>discrete probability distribution</b> is that list, plus a number next to each answer telling you how likely it is. The rule that gives those numbers is called the <b>probability mass function</b>, or <b>PMF</b>, written \(P(X = x)\).</p>
+
+    <div class="rules">
+      <div class="rule"><b>Every bar is between 0 and 1</b><span>No outcome can be less than impossible <code>0</code> or more than certain <code>1</code>.</span></div>
+      <div class="rule"><b>All bars add up to 1</b><span>Something has to happen, so the chances share one whole: <code>Σ P(x) = 1</code>.</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">A single die roll</div>
+        <div class="hint">Drag any bar up or down</div>
+      </div>
+      <svg class="chart drag" id="c0" role="img" aria-label="Probability of each die face"></svg>
+      <div class="legend"><span><i class="lg-mean"></i>mean μ (balance point)</span><span><i class="lg-bar" style="background:var(--accent);opacity:.2"></i>μ ± σ (typical spread)</span></div>
+      <div class="result" id="c0-res" style="margin-top:10px">Drag the bars, or load a worked example.</div>
+      <div class="card-foot">
+        <div class="chips">
+          <span class="chip acc" id="c0sum"></span>
+          <span class="chip" id="c0mu"></span>
+          <span class="chip" id="c0sd"></span>
+        </div>
+        <div class="btns">
+          <button id="c0load">Load the die</button>
+          <button id="c0fair">Fair die</button>
+        </div>
+      </div>
+
+      <div class="sub">Cumulative · P(X ≤ x)</div>
+      <svg class="chart" id="c0cdf" role="img" aria-label="Cumulative distribution of the die"></svg>
+      <div class="hint">Hover a step to see which bars it adds up.</div>
+    </div>
+
+    <h3>Two numbers that summarise any distribution</h3>
+    <p><b>Mean (μ)</b> is the balance point. Imagine the bars are weights on a ruler: the black triangle is where the ruler balances. Drag a bar on the right up and watch the triangle slide right.</p>
+    <p><b>Standard deviation (σ)</b> measures spread: how far outcomes typically land from the mean. The shaded band is μ ± σ. Pile everything onto one face and it shrinks to nothing; push weight to both ends and it widens.</p>
+    <p><b>The CDF</b> (cumulative distribution function) is the running total of the bars, read left to right. It answers questions like "what's the chance of rolling 4 or less?" It always climbs in steps from 0 to 1.</p>
+
+    <div class="formula">
+      <div>
+        <div class="t">Definitions</div>
+        $$\mu = E[X] = \sum_x x\,P(x)$$
+        $$\sigma^2 = \sum_x (x-\mu)^2\,P(x)$$
+        $$F(x) = P(X \le x)$$
+      </div>
+      <div>
+        <div class="t">In words</div>
+        <p style="margin:8px 0 0">Mean: each outcome times its chance, added up.<br><br>Variance σ²: average squared distance from the mean. σ is its square root.<br><br>CDF: add up every bar up to x.</p>
+      </div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="fx-panel" aria-haspopup="dialog" aria-controls="fx-panel">
+        <span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples
+      </button>
+      <span class="note">Mean and spread of a die, "at most" with the CDF, a loaded die</span>
+    </div>
+    <div class="ex-launch" style="margin-top:12px">
+      <button class="ex-fab qz-fab" data-quiz="basics" aria-haspopup="dialog" aria-controls="qz-modal">
+        <span class="ex-fab-dot" aria-hidden="true">?</span>Quiz
+      </button>
+      <span class="note">4 quick questions: missing bars, valid PMFs, the balance point, reading a CDF</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 1 ============ -->
+  <section id="uniform">
+    <div class="eyebrow">Stage 1</div>
+    <h2>Discrete Uniform Distribution</h2>
+    <p class="tagline">Every outcome equally likely</p>
+    <p>The simplest distribution of all: \(n\) outcomes, and no favourites. Each one gets the same slice, \(1/n\). A fair die is uniform with \(n = 6\); a fair lottery ball draw is uniform with \(n\) = number of balls.</p>
+
+    <p>A count is Discrete Uniform only when both of these hold:</p>
+    <div class="rules">
+      <div class="rule"><b>1 · A fixed list of n outcomes</b><span>You can write down every possible result in advance: faces 1 to \(n\), tickets 1 to 20.<br><i>Breaks if:</i> there's no upper limit, like the number of emails you'll get today. That's closer to Poisson.</span></div>
+      <div class="rule"><b>2 · No favourites</b><span>Every outcome has exactly the same chance, \(1/n\).<br><i>Breaks if:</i> the die is loaded, or you add up two dice: a total of 7 is six times as likely as a total of 2.</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">A fair n-sided die</div>
+        <div class="hint">Change n, then roll</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Number of sides n <b id="u-n-v"></b></label><input type="range" id="u-n" min="2" max="20" value="6"></div>
+      </div>
+      <svg class="chart" id="c1" role="img" aria-label="Uniform distribution"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>theory (PMF)</span><span><i class="lg-emp"></i>what actually happened</span><span><i class="lg-mean"></i>mean</span></div>
+      <div class="card-foot">
+        <div class="result" id="u-res">Roll the die to start.</div>
+        <div class="btns">
+          <button class="primary" id="u-1">Roll</button>
+          <button id="u-600">Roll ×600</button>
+          <button id="u-r">Clear</button>
+        </div>
+      </div>
+
+      <div class="sub">Cumulative · P(X ≤ x)</div>
+      <svg class="chart" id="c1cdf" role="img" aria-label="Cumulative distribution of the uniform die"></svg>
+      <div class="hint">Hover a step to see which bars it adds up. Every step is the same height, 1/n, so the staircase climbs evenly: F(x) = x/n.</div>
+    </div>
+    <p class="note">Roll a few times and the orange marks jump around. Roll a few thousand and they settle onto the bars. That's the <b>law of large numbers</b>: the PMF is what frequencies look like in the long run.</p>
+
+    <h3>Reading the graph</h3>
+    <p>Every bar is the same height, \(1/n\), so the chart is a flat row of bars. There's only one slider, so there's only one thing to watch:</p>
+    <div class="rules">
+      <div class="rule"><b>When n goes up ↑</b><span>The row gets <b style="display:inline">longer</b> and every bar gets <b style="display:inline">shorter</b>: the same total of 1 is shared by more outcomes. The mean \((n+1)/2\) slides right, and the spread grows roughly in step with \(n\), because \(\sigma \approx n/\sqrt{12}\).</span></div>
+      <div class="rule"><b>The mean sits dead centre</b><span>The bars are perfectly symmetric, so the balance point is exactly halfway between 1 and \(n\). It doesn't have to be a face you can roll: for a die it's 3.5. The CDF matches: a straight, even staircase.</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">PMF</div>
+        $$P(X = x) = \frac{1}{n},\quad x = 1,\dots,n$$
+        <div class="t">CDF</div>
+        $$F(x) = P(X \le x) = \frac{x}{n}$$
+      </div>
+      <div>
+        <div class="t">Summary</div>
+        $$\mu = \frac{n+1}{2},\qquad \sigma^2 = \frac{n^2-1}{12}$$
+        <div id="u-stats" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(n\)</div><div>how many equally likely outcomes there are</div>
+        <div>\(x\)</div><div>the outcome you're asking about, from 1 to \(n\)</div>
+        <div>\(\frac{1}{n}\)</div><div>each outcome's equal share of the total chance of 1</div>
+        <div>\(\frac{x}{n}\)</div><div>the CDF: \(x\) outcomes sit at or below \(x\), each worth \(\frac{1}{n}\)</div>
+        <div>\(\frac{n+1}{2}\)</div><div>the middle of 1, 2, …, \(n\): the balance point</div>
+        <div>\(\frac{n^2-1}{12}\)</div><div>the variance: grows quickly with \(n\), since a longer row leaves more room to land far from the middle</div>
+      </div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="ux-panel" aria-haspopup="dialog" aria-controls="ux-panel">
+        <span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples
+      </button>
+      <span class="note">Raffle tickets, a 12-sided die, an 8-sided die's mean</span>
+    </div>
+    <div class="ex-launch" style="margin-top:12px">
+      <button class="ex-fab qz-fab" data-quiz="uniform" aria-haspopup="dialog" aria-controls="qz-modal">
+        <span class="ex-fab-dot" aria-hidden="true">?</span>Quiz
+      </button>
+      <span class="note">4 quick questions: Spotting Uniform, "at least", the mean, what happens when n grows</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 2 ============ -->
+  <section id="bernoulli">
+    <div class="eyebrow">Stage 2</div>
+    <h2>Bernoulli Distribution</h2>
+    <p class="tagline">One try, two outcomes</p>
+    <p>A <b>Bernoulli trial</b> is any single experiment with a yes/no answer: did the coin land heads, did the customer click, did the free throw go in. We call "yes" a <em class="key">success</em> and score it 1; "no" is a failure, scored 0.</p>
+    <p>One number controls everything: \(p\), the chance of success. The failure bar is whatever is left, \(1-p\).</p>
+    <p>That rule is the Bernoulli <b>PMF</b>. It fits in one line, \(P(X = x) = p^x(1-p)^{1-x}\): put in \(x = 1\) and you get \(p\); put in \(x = 0\) and you get \(1-p\).</p>
+
+    <p>A random quantity is Bernoulli only when both of these hold:</p>
+    <div class="rules">
+      <div class="rule"><b>1 · Exactly one try</b><span>A single shot, a single flip, a single customer.<br><i>Breaks if:</i> you take 10 shots and count how many go in. That's Binomial.</span></div>
+      <div class="rule"><b>2 · Two outcomes, scored 1 and 0</b><span>Success counts as 1, failure as 0, and nothing else can happen.<br><i>Breaks if:</i> the result has more levels, like a die's 1 to 6, unless you collapse it to "six / not six".</span></div>
+    </div>
+
+    <div class="example"><b>Example:</b> a basketball player makes 70% of free throws. One shot is Bernoulli with \(p = 0.7\).</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">A (possibly unfair) coin</div>
+        <div class="hint">Slide p, then flip</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Chance of success p <b id="b-p-v"></b></label><input type="range" id="b-p" min="0" max="1" step="0.01" value="0.7"></div>
+      </div>
+      <div class="coin-row">
+        <div class="coin" id="b-coin">?</div>
+        <div class="result" id="b-res">Flip the coin.</div>
+      </div>
+      <svg class="chart" id="c2" role="img" aria-label="Bernoulli distribution"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>theory (PMF)</span><span><i class="lg-emp"></i>what actually happened</span><span><i class="lg-mean"></i>mean = p</span></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="b-mu"></span><span class="chip" id="b-var"></span></div>
+        <div class="btns">
+          <button class="primary" id="b-1">Flip</button>
+          <span class="nin"><input type="number" id="b-n" min="1" max="1000000" value="10" aria-label="Number of flips"><button id="b-100">Flip n times</button></span>
+          <button id="b-r">Clear</button>
+        </div>
+      </div>
+
+      <div class="sub">Cumulative · P(X ≤ x)</div>
+      <svg class="chart" id="c2cdf" role="img" aria-label="Cumulative distribution of the Bernoulli trial"></svg>
+      <div class="hint">Hover a step to see which bars it adds up. The CDF sits at 1 − p, then jumps by p to 1.</div>
+    </div>
+    <p class="note">Slide p to 0.5 and the variance peaks at 0.25: a fair coin is the <i>least</i> predictable. Push p toward 0 or 1 and the variance collapses because the outcome is nearly certain.</p>
+
+    <h3>Reading the graph</h3>
+    <p>Two bars, one slider. Whatever one bar gains, the other loses:</p>
+    <div class="rules">
+      <div class="rule"><b>When p goes up ↑</b><span>The success bar grows and the failure bar shrinks by exactly the same amount, so they always add to 1. The mean line slides <b style="display:inline">right</b>, because \(\mu = p\): it sits between the two bars, nearer the taller one.</span></div>
+      <div class="rule"><b>The CDF has one jump that matters</b><span>It sits at \(1-p\) (the failure bar) from 0 up to 1, then jumps by \(p\) to reach 1. Read the size of that last jump and you've read \(p\).</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">PMF</div>
+        $$P(X = x) = p^x(1-p)^{1-x},\quad x \in \{0, 1\}$$
+        <div class="t">CDF</div>
+        $$F(x) = P(X \le x) = \begin{cases} 0 & x < 0 \\ 1-p & 0 \le x < 1 \\ 1 & x \ge 1 \end{cases}$$
+      </div>
+      <div>
+        <div class="t">Summary</div>
+        $$P(X = 1) = p,\qquad P(X = 0) = 1 - p$$
+        $$\mu = p,\qquad \sigma^2 = p(1-p)$$
+      </div>
+    </div>
+
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(x\)</div><div>the outcome: 1 for success, 0 for failure</div>
+        <div>\(p\)</div><div>the chance of success on this one try</div>
+        <div>\(1-p\)</div><div>the chance of failure: whatever is left over</div>
+        <div>\(p^x(1-p)^{1-x}\)</div><div>a switch: with \(x = 1\) only \(p\) survives, with \(x = 0\) only \(1-p\) does (anything to the power 0 is 1)</div>
+        <div>\(p(1-p)\)</div><div>the variance: largest at \(p = 0.5\), and 0 when the outcome is certain</div>
+      </div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="be-panel" aria-haspopup="dialog" aria-controls="be-panel">
+        <span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples
+      </button>
+      <span class="note">A missed free throw, a faulty part, the least predictable coin</span>
+    </div>
+    <div class="ex-launch" style="margin-top:12px">
+      <button class="ex-fab qz-fab" data-quiz="bernoulli" aria-haspopup="dialog" aria-controls="qz-modal">
+        <span class="ex-fab-dot" aria-hidden="true">?</span>Quiz
+      </button>
+      <span class="note">4 quick questions: Finding p, the most unpredictable trial, the mean, reading the CDF</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 3 ============ -->
+  <section id="binomial">
+    <div class="eyebrow">Stage 3</div>
+    <h2>Binomial Distribution</h2>
+    <p class="tagline">Count the successes in n tries</p>
+    <p>Now repeat the Bernoulli trial \(n\) times. Same \(p\) every time, and no trial affects another. Then <em class="key">count</em> the successes. That count, a number from 0 to \(n\), follows the <b>Binomial distribution</b>.</p>
+
+    <p>A count is Binomial only when all four of these hold:</p>
+    <div class="rules" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="rule"><b>1 · Fixed number of trials</b><span>\(n\) is decided before you start: 10 free throws, 20 bulbs, 30 visitors.<br><i>Breaks if:</i> you keep going "until the 3rd success". That's Negative Binomial.</span></div>
+      <div class="rule"><b>2 · Two outcomes per trial</b><span>Each trial is either a success (1) or a failure (0). Nothing in between.<br><i>Breaks if:</i> a die roll is scored 1–6 rather than "six / not six".</span></div>
+      <div class="rule"><b>3 · Same p every time</b><span>Success has chance \(p\) on every trial, so failure always has chance \(1-p\).<br><i>Breaks if:</i> the player gets tired and their \(p\) drops shot by shot.</span></div>
+      <div class="rule"><b>4 · Independent trials</b><span>One trial's outcome doesn't change the next one's chances.<br><i>Breaks if:</i> you draw cards <i>without</i> putting them back. Each draw changes the deck.</span></div>
+    </div>
+
+    <div class="example"><b>Example:</b> the same player takes 10 free throws. How many go in? Binomial with \(n = 10,\ p = 0.7\).</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">n trials, count the successes</div>
+        <div class="hint">Hover a bar for its formula</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Number of trials n <b id="n-n-v"></b></label><input type="range" id="n-n" min="1" max="40" value="10"></div>
+        <div class="ctl"><label>Chance of success p <b id="n-p-v"></b></label><input type="range" id="n-p" min="0" max="1" step="0.01" value="0.7"></div>
+      </div>
+      <div class="trials" id="n-trials"></div>
+      <div class="result" id="n-res">Run an experiment: n trials, one at a time.</div>
+      <svg class="chart" id="c3" role="img" aria-label="Binomial distribution"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>theory (PMF)</span><span><i class="lg-emp"></i>what actually happened</span><span><i class="lg-mean"></i>mean = np</span></div>
+      <div class="shape-note" id="n-shape"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="n-mu"></span><span class="chip" id="n-sd"></span></div>
+        <div class="btns">
+          <button class="primary" id="n-1">Run experiment</button>
+          <button id="n-500">Run ×500</button>
+          <button id="n-r">Clear</button>
+        </div>
+      </div>
+
+      <div class="sub">Cumulative · P(X ≤ k)</div>
+      <svg class="chart" id="c3cdf" role="img" aria-label="Cumulative distribution of the Binomial count"></svg>
+      <div class="hint">Hover a step to see which bars it adds up.</div>
+    </div>
+
+    <h3>Reading the graph</h3>
+    <p>Each bar is the chance of one exact count. The tallest bar is the most likely count, and it sits close to the mean \(np\). Move the sliders and watch how the shape responds:</p>
+    <div class="rules">
+      <div class="rule"><b>When p goes up ↑</b><span>The hump slides <b style="display:inline">right</b>: more successes become likely. At \(p = 0.5\) it is perfectly symmetric. Near 0 or 1 it gets squashed against a wall and becomes lopsided, with a long tail on the open side.</span></div>
+      <div class="rule"><b>When n goes up ↑</b><span>The hump also slides <b style="display:inline">right</b> (the mean \(np\) grows), and it <b style="display:inline">spreads out</b>, because \(\sigma = \sqrt{np(1-p)}\) grows too. Each bar gets shorter since the same total of 1 is shared by more bars, and the shape tends toward a smooth bell curve.</span></div>
+    </div>
+
+    <h3>Where the formula comes from</h3>
+    <p>Take \(n = 5\) and ask for exactly \(k = 2\) successes. One way that happens is <code>S S F F F</code>. Its probability is \(p \cdot p \cdot (1-p)(1-p)(1-p) = p^2(1-p)^3\).</p>
+    <p>But <code>S F S F F</code>, <code>F F F S S</code>, and others work too. Every arrangement has the same probability, so we just count the arrangements: "5 choose 2" \(= \binom{5}{2} = 10\). Multiply and you have the formula.</p>
+    <p>That is the Binomial <b>PMF</b>. It gives the chance of exactly \(k\) successes, for any \(k = 0, 1, \dots, n\).</p>
+
+    <div class="formula">
+      <div>
+        <div class="t">PMF</div>
+        $$P(X = k) = \underbrace{\binom{n}{k}}_{\text{arrangements}}\; \underbrace{p^k (1-p)^{n-k}}_{\text{one arrangement}}$$
+        <div class="t">CDF</div>
+        $$F(k) = P(X \le k) = \sum_{i=0}^{k} \binom{n}{i} p^i (1-p)^{n-i}$$
+      </div>
+      <div>
+        <div class="t">Summary</div>
+        $$\mu = np,\qquad \sigma^2 = np(1-p)$$
+        <p class="note" style="margin:0">With \(n = 1\) this is exactly Bernoulli.</p>
+      </div>
+    </div>
+
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(n\)</div><div>number of trials, fixed before you start</div>
+        <div>\(k\)</div><div>the exact number of successes you're asking about (0 to \(n\))</div>
+        <div>\(p\)</div><div>chance of success on any single trial</div>
+        <div>\(\binom{n}{k}\)</div><div>"n choose k": how many different ways to place \(k\) successes among the \(n\) trials, \(\frac{n!}{k!\,(n-k)!}\)</div>
+        <div>\(p^k\)</div><div>the \(k\) successes all happen: \(p\) multiplied \(k\) times</div>
+        <div>\((1-p)^{n-k}\)</div><div>the other \(n-k\) trials are all failures</div>
+      </div>
+    </div>
+
+    <h3>The CDF: "at most" and "at least"</h3>
+    <p>The PMF answers "<i>exactly</i> \(k\)". The <b>CDF</b> \(F(k) = P(X \le k)\) answers "<i>at most</i> \(k\)": add up every bar from 0 to \(k\). There's no shortcut formula; it really is just that sum. Hover the cumulative chart above to watch it add up.</p>
+    <p>For "<i>at least</i> \(k\)", flip it around. Everything that isn't "at most \(k-1\)" is "at least \(k\)":</p>
+    $$P(X \ge k) = 1 - F(k-1)$$
+    <div class="example"><b>Worked example:</b> 10 free throws, \(p = 0.7\) (the chart's starting setting).<br>
+      <b>At most 7 go in:</b> \(F(7) = P(0) + P(1) + \dots + P(7) \approx 0.617\). Hover step 7 on the cumulative chart to check.<br>
+      <b>At least 8 go in:</b> \(P(X \ge 8) = 1 - F(7) \approx 1 - 0.617 = 0.383\). That's the same as adding the three right-hand bars, \(0.233 + 0.121 + 0.028\).</div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="bx-panel" aria-haspopup="dialog" aria-controls="bx-panel">
+        <span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples
+      </button>
+      <span class="note">Quiz guessing, faulty bulbs, ad clicks</span>
+    </div>
+    <div class="ex-launch" style="margin-top:12px">
+      <button class="ex-fab qz-fab" data-quiz="binomial" aria-haspopup="dialog" aria-controls="qz-modal">
+        <span class="ex-fab-dot" aria-hidden="true">?</span>Quiz
+      </button>
+      <span class="note">4 quick questions: Spotting Bin(4, 0.5), the most likely count, exactly 2 heads, "at least one"</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 4 ============ -->
+  <section id="negbin">
+    <div class="eyebrow">Stage 4</div>
+    <h2>Negative Binomial Distribution</h2>
+    <p class="tagline">How many tries until the r-th success?</p>
+    <p>Binomial fixes the number of tries and counts the successes. The <b>Negative Binomial</b> flips the question around: fix the number of successes you want, \(r\), and count how many tries it <em class="key">takes</em> to get there.</p>
+    <p>Since you can't succeed more times than you try, the answer is always at least \(r\). There is no upper limit, though: with bad luck it could take forever, so the bars go on to the right without end (they just get too small to see).</p>
+
+    <p>A count is Negative Binomial only when all four of these hold:</p>
+    <div class="rules" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="rule"><b>1 · Fixed number of successes</b><span>\(r\) is decided before you start: until the 3rd deal, until the 1st six.<br><i>Breaks if:</i> the number of tries is fixed instead, like "make 20 calls". That's Binomial.</span></div>
+      <div class="rule"><b>2 · Two outcomes per try</b><span>Each try is a success or a failure. Nothing in between.<br><i>Breaks if:</i> a call can also end in "maybe, call me next week", and you count that differently.</span></div>
+      <div class="rule"><b>3 · Same p every time</b><span>Every try has the same chance of success \(p\).<br><i>Breaks if:</i> the salesperson warms up and gets better as the day goes on.</span></div>
+      <div class="rule"><b>4 · Independent tries</b><span>One try's result doesn't change the next one's chances.<br><i>Breaks if:</i> a string of rejections makes the salesperson nervous, which lowers their chances on the next call.</span></div>
+    </div>
+
+    <div class="example"><b>Example:</b> a salesperson closes 20% of calls. How many calls until they close <b>3</b> deals? Negative Binomial with \(r = 3,\ p = 0.2\).</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Keep trying until r successes</div>
+        <div class="hint">Hover a bar for its formula</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Successes needed r <b id="nb-r-v"></b></label><input type="range" id="nb-r" min="1" max="10" value="3"></div>
+        <div class="ctl"><label>Chance of success p <b id="nb-p-v"></b></label><input type="range" id="nb-p" min="0.1" max="1" step="0.01" value="0.4"></div>
+      </div>
+      <div class="trials" id="nb-trials"></div>
+      <div class="result" id="nb-res">Run an experiment: keep trying until you hit r successes.</div>
+      <svg class="chart" id="c4" role="img" aria-label="Negative binomial distribution"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>theory (PMF)</span><span><i class="lg-emp"></i>what actually happened</span><span><i class="lg-mean"></i>mean = r / p</span></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="nb-mu"></span><span class="chip" id="nb-sd"></span></div>
+        <div class="btns">
+          <button class="primary" id="nb-1">Run experiment</button>
+          <button id="nb-500">Run ×500</button>
+          <button id="nb-geo">Set r = 1</button>
+          <button id="nb-clr">Clear</button>
+        </div>
+      </div>
+
+      <div class="sub">Cumulative · P(X ≤ x)</div>
+      <svg class="chart" id="c4cdf" role="img" aria-label="Cumulative distribution of the number of tries"></svg>
+      <div class="hint">Hover a step to see which bars it adds up. It stays at 0 until x = r, since you can't finish in fewer than r tries, then creeps toward 1 without ever quite reaching it.</div>
+    </div>
+
+    <h3>Reading the graph</h3>
+    <p>There's a wall on the left at \(x = r\) and no limit on the right, so the shape always has a long tail trailing off to the right. Move the sliders and watch:</p>
+    <div class="rules">
+      <div class="rule"><b>When p goes up ↑</b><span>The hump slides <b style="display:inline">left</b> and gets narrower: easy successes mean fewer tries. The mean \(r/p\) shrinks toward \(r\). At \(p = 1\) every try succeeds, so everything sits on one bar at \(x = r\).</span></div>
+      <div class="rule"><b>When r goes up ↑</b><span>The hump slides <b style="display:inline">right</b> (the mean \(r/p\) grows) and <b style="display:inline">spreads out</b>, because \(\sigma^2 = r(1-p)/p^2\) grows too. With a big \(r\) the wall at the left matters less and the shape turns into a bell.</span></div>
+    </div>
+
+    <h3>Special case: the Geometric distribution</h3>
+    <p>Press <b>Set r = 1</b>. Now you're asking "how many tries until the <i>first</i> success?" That special case has its own name, the <b>Geometric distribution</b>. Its bars always start tallest at 1 and shrink step by step, each one \((1-p)\) times the one before. Small \(p\) means a long, slow tail: rare events can keep you waiting.</p>
+
+    <h3>Where the formula comes from</h3>
+    <p>For the \(r\)-th success to land exactly on try \(x\), two things must happen: try \(x\) itself is a success, and the earlier \(x - 1\) tries contain exactly \(r - 1\) successes in any order. Counting those orders gives \(\binom{x-1}{r-1}\).</p>
+
+    <div class="formula">
+      <div>
+        <div class="t">PMF</div>
+        $$P(X = x) = \binom{x-1}{r-1}\, p^r (1-p)^{x-r}$$
+        <p class="note" style="margin:0">for \(x = r,\ r+1,\ r+2,\dots\)</p>
+        <div class="t">CDF</div>
+        $$F(x) = P(X \le x) = \sum_{i=r}^{x} \binom{i-1}{r-1} p^r (1-p)^{i-r}$$
+        <p class="note" style="margin:0">With \(r = 1\) (Geometric) the sum collapses to \(F(x) = 1 - (1-p)^x\): the chance that not all of the first \(x\) tries fail.</p>
+      </div>
+      <div>
+        <div class="t">Summary</div>
+        $$\mu = \frac{r}{p},\qquad \sigma^2 = \frac{r(1-p)}{p^2}$$
+        <p class="note" style="margin:0">Some books count only the <i>failures</i> before the r-th success; that's this same distribution shifted left by \(r\).</p>
+      </div>
+    </div>
+
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(x\)</div><div>the number of tries it takes to reach the \(r\)-th success (\(r\) or more)</div>
+        <div>\(r\)</div><div>how many successes you're waiting for</div>
+        <div>\(p\)</div><div>chance of success on any single try</div>
+        <div>\(\binom{x-1}{r-1}\)</div><div>the ways to place the first \(r-1\) successes among the first \(x-1\) tries (the last try must be the \(r\)-th success)</div>
+        <div>\(p^r\)</div><div>all \(r\) successes happen</div>
+        <div>\((1-p)^{x-r}\)</div><div>the other \(x-r\) tries are all failures</div>
+      </div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="nbx-panel" aria-haspopup="dialog" aria-controls="nbx-panel">
+        <span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples
+      </button>
+      <span class="note">Sales calls, getting through on the phone, a best-of-7 series</span>
+    </div>
+    <div class="ex-launch" style="margin-top:12px">
+      <button class="ex-fab qz-fab" data-quiz="negbin" aria-haspopup="dialog" aria-controls="qz-modal">
+        <span class="ex-fab-dot" aria-hidden="true">?</span>Quiz
+      </button>
+      <span class="note">4 quick questions: Where the bars start, the Geometric peak, the average wait, waiting longer</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 5 ============ -->
+  <section id="poisson">
+    <div class="eyebrow">Stage 5</div>
+    <h2>Poisson Distribution</h2>
+    <p class="tagline">How many events happen in a fixed window?</p>
+    <p>Some things happen at random moments, at some steady average rate: customers walking into a shop, typos on a page, meteors in the night sky. Pick a window (an hour, a page, a square metre) and <em class="key">count</em> the events inside it. That count follows a <b>Poisson distribution</b>.</p>
+    <p>Only one number is needed: \(\lambda\) (lambda), the average count per window. There are no "trials" and no \(p\), just a rate.</p>
+
+    <p>A count is Poisson when all four of these hold:</p>
+    <div class="rules" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="rule"><b>1 · A fixed window</b><span>You count events inside a set stretch of time or space: one hour, one page, one square metre.<br><i>Breaks if:</i> you wait until the next event happens. That waiting time is a continuous quantity, not a count.</span></div>
+      <div class="rule"><b>2 · One event at a time</b><span>Two events never land at exactly the same instant.<br><i>Breaks if:</i> people arrive in groups, like a bus dropping 30 shoppers at the door at once.</span></div>
+      <div class="rule"><b>3 · A steady average rate</b><span>Events are equally likely at every moment of the window.<br><i>Breaks if:</i> you count a whole day's calls with a lunchtime rush. Split the day into windows with their own \(\lambda\).</span></div>
+      <div class="rule"><b>4 · Independent events</b><span>One event doesn't make another more or less likely.<br><i>Breaks if:</i> one earthquake sets off a cluster of aftershocks.</span></div>
+    </div>
+
+    <h3>What λ actually means</h3>
+    <div class="rules" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div class="rule"><b>The long-run average count</b><span>If you watched many, many hours and averaged the counts, you'd get \(\lambda\). Any single hour can still have 0, 2 or 9 events. \(\lambda\) is the average, not a promise.</span></div>
+      <div class="rule"><b>Rate × window length</b><span>\(\lambda\) belongs to the window you picked. At 4 calls per hour, a 30-minute window has \(\lambda = 2\) and a 2-hour window has \(\lambda = 8\). Change the window and \(\lambda\) scales with it.</span></div>
+      <div class="rule"><b>Doesn't have to be whole</b><span>Counts are whole numbers, but their average doesn't have to be: \(\lambda = 2.5\) typos per page is perfectly fine.</span></div>
+      <div class="rule"><b>Sets the centre and the spread</b><span>The mean is \(\lambda\) <i>and</i> the variance is \(\lambda\). A bigger \(\lambda\) moves the hump right and spreads it out, both at once.</span></div>
+    </div>
+
+    <div class="example"><b>Example:</b> a help desk gets on average 4 calls an hour. Calls in the next hour: Poisson with \(\lambda = 4\).</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Events landing in one hour</div>
+        <div class="hint">Slide λ, then watch an hour</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Average events per hour λ <b id="po-l-v"></b></label><input type="range" id="po-l" min="0.5" max="20" step="0.5" value="4"></div>
+      </div>
+      <svg class="chart" id="po-tl" viewBox="0 0 640 64" role="img" aria-label="Timeline of events in one hour"></svg>
+      <div class="result" id="po-res">Each dot is one event at a random moment in the hour.</div>
+      <svg class="chart" id="c5" role="img" aria-label="Poisson distribution"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>theory (PMF)</span><span><i class="lg-emp"></i>what actually happened</span><span><i class="lg-mean"></i>mean = λ</span></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="po-mu"></span><span class="chip" id="po-var"></span></div>
+        <div class="btns">
+          <button class="primary" id="po-1">Watch an hour</button>
+          <button id="po-500">Simulate ×500 hours</button>
+          <button id="po-clr">Clear</button>
+        </div>
+      </div>
+
+      <div class="sub">Cumulative · P(X ≤ k)</div>
+      <svg class="chart" id="c5cdf" role="img" aria-label="Cumulative distribution of the Poisson count"></svg>
+      <div class="hint">Hover a step to see which bars it adds up. The first step, at k = 0, is already e<sup>−λ</sup>: the chance of a completely quiet hour.</div>
+    </div>
+    <p class="note">Notice the mean and variance chips always match. That's a Poisson fingerprint: if your count data has variance far bigger than its mean, Poisson is the wrong model. Also watch the shape: small \(\lambda\) is lopsided against 0 (right-skewed); large \(\lambda\) becomes a symmetric bell.</p>
+
+    <h3>Reading the graph</h3>
+    <p>There's a wall at 0 (counts can't be negative) and no limit on the right. One slider, \(\lambda\), controls everything:</p>
+    <div class="rules">
+      <div class="rule"><b>When λ goes up ↑</b><span>The hump slides <b style="display:inline">right</b> (the mean is \(\lambda\)) and <b style="display:inline">spreads out</b> (\(\sigma = \sqrt{\lambda}\)). Bars get shorter as more counts share the total of 1, and the lopsided shape turns into a symmetric bell.</span></div>
+      <div class="rule"><b>When λ is below 1</b><span>The tallest bar is at 0: a quiet window is the single most likely result. The bars only shrink from there, each one \(\lambda/k\) times the one before it.</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">PMF</div>
+        $$P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}$$
+        <p class="note" style="margin:0">for \(k = 0, 1, 2, \dots\)</p>
+        <div class="t">CDF</div>
+        $$F(k) = P(X \le k) = \sum_{i=0}^{k} \frac{\lambda^i e^{-\lambda}}{i!}$$
+      </div>
+      <div>
+        <div class="t">Summary</div>
+        $$\mu = \lambda,\qquad \sigma^2 = \lambda$$
+      </div>
+    </div>
+
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(\lambda\)</div><div>the average number of events per window</div>
+        <div>\(k\)</div><div>the exact count you're asking about (0, 1, 2, …, no upper limit)</div>
+        <div>\(\frac{\lambda^k}{k!}\)</div><div>room for \(k\) events somewhere in the window; their order doesn't matter, so divide by \(k!\)</div>
+        <div>\(e^{-\lambda}\)</div><div>the rest of the window stays quiet; with \(k = 0\) it's the chance of no events at all</div>
+      </div>
+    </div>
+
+    <h3>Why that formula? Slice the hour into tiny pieces</h3>
+    <p>The formula looks like it came from nowhere, but it is just the Binomial in disguise. Take the help desk: \(\lambda = 4\) calls per hour, and ask for exactly \(k = 2\) calls.</p>
+    <div class="rules" style="grid-template-columns:1fr">
+      <div class="rule"><b>Step 1 · Chop the hour into n slices</b><span>Cut the hour into \(n\) equal slices, say \(n = 3600\) one-second slices. Make them thin enough that two calls never land in the same slice. Then each slice is a yes/no trial: a call arrives in it, or it doesn't.</span></div>
+      <div class="rule"><b>Step 2 · The chance per slice is p = λ / n</b><span>The hour holds \(\lambda = 4\) calls on average, spread over \(n\) slices, so each slice gets a call with chance \(p = \lambda / n = 4/3600 \approx 0.0011\). Check: \(n\) slices × \(\lambda/n\) each \(= \lambda\) calls expected. ✓</span></div>
+      <div class="rule"><b>Step 3 · That's a Binomial</b><span>\(n\) independent slices with the same chance \(p\), counting the "yes" slices, is exactly Binomial. Pick which \(k\) slices get a call (\(\binom{n}{k}\) ways), those \(k\) say yes, the other \(n-k\) say no:
+        $$P(X = k) = \binom{n}{k}\left(\frac{\lambda}{n}\right)^{k}\left(1-\frac{\lambda}{n}\right)^{n-k}$$</span></div>
+      <div class="rule"><b>Step 4 · Make the slices infinitely thin (n → ∞)</b><span>Real calls can arrive at any instant, not just on the second, so let \(n\) grow without limit and see what each piece turns into:
+        $$\binom{n}{k}\frac{1}{n^k} = \frac{n(n-1)\cdots(n-k+1)}{k!\;n^k} \;\to\; \frac{1}{k!}$$
+        <span style="display:block;margin:-4px 0 6px">With huge \(n\), each of \(n, n-1, \dots, n-k+1\) is basically \(n\), so the top is about \(n^k\) and cancels. So \(\binom{n}{k}\left(\frac{\lambda}{n}\right)^{k} \to \frac{\lambda^k}{k!}\).</span>
+        $$\left(1-\frac{\lambda}{n}\right)^{n} \;\to\; e^{-\lambda}$$
+        <span style="display:block;margin:-4px 0 6px">This is the famous limit that defines \(e\). It is the chance that all \(n\) slices stay quiet. The leftover \(\left(1-\frac{\lambda}{n}\right)^{-k}\) has only \(k\) factors, each almost 1, so it \(\to 1\).</span></span></div>
+      <div class="rule"><b>Step 5 · Multiply the pieces</b><span>
+        $$\binom{n}{k}\left(\frac{\lambda}{n}\right)^{k}\left(1-\frac{\lambda}{n}\right)^{n-k} \;\longrightarrow\; \frac{\lambda^k}{k!}\cdot e^{-\lambda}$$
+        That's the Poisson PMF. The \(n\) and the \(p\) have both disappeared, and only the rate \(\lambda\) is left.</span></div>
+    </div>
+    <div class="example"><b>Check with numbers</b> (\(\lambda = 4,\ k = 2\)). Poisson gives \(\frac{4^2 e^{-4}}{2!} \approx 0.1465\). The Binomial with \(p = 4/n\) gets there as the slices shrink:<br>
+      \(n = 10\) slices (6 min each): \(0.1209\)<br>
+      \(n = 60\) slices (1 min each): \(0.1439\)<br>
+      \(n = 3600\) slices (1 s each): \(0.1465\)<br>
+      Likewise \(\left(1-\frac{4}{3600}\right)^{3600} \approx 0.01827\), already very close to \(e^{-4} \approx 0.01832\).</div>
+
+    <h3>See it happen: Binomial with tiny chances</h3>
+    <p>Here are the same slices as a chart. Make them thinner and thinner, so \(n\) grows and \(p\) shrinks while \(n \cdot p\) stays at \(\lambda\). The Binomial bars melt into Poisson.</p>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Binomial(n, λ/n) → Poisson(λ = 3)</div>
+        <div class="hint">Drag n upward</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Number of slices n <b id="bp-n-v"></b></label><input type="range" id="bp-n" min="4" max="200" value="5"></div>
+      </div>
+      <svg class="chart" id="c5b" role="img" aria-label="Binomial converging to Poisson"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>Binomial(n, 3/n)</span><span><i class="lg-ovl"></i>Poisson(3)</span></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="bp-p"></span><span class="chip acc" id="bp-gap"></span></div>
+      </div>
+    </div>
+    <p class="note">Rule of thumb: when \(n\) is large and \(p\) is small (say \(n \ge 20,\ p \le 0.05\)), you can swap a Binomial for Poisson with \(\lambda = np\), which is far easier to compute.</p>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="px-panel" aria-haspopup="dialog" aria-controls="px-panel">
+        <span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples
+      </button>
+      <span class="note">A quiet hour at the help desk, typos on a page, a longer window</span>
+    </div>
+    <div class="ex-launch" style="margin-top:12px">
+      <button class="ex-fab qz-fab" data-quiz="poisson" aria-haspopup="dialog" aria-controls="qz-modal">
+        <span class="ex-fab-dot" aria-hidden="true">?</span>Quiz
+      </button>
+      <span class="note">4 quick questions: Spotting λ = 1, the most likely count, scaling λ, the chance of zero</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 6 ============ -->
+  <section id="family">
+    <div class="eyebrow">Stage 6</div>
+    <h2>The Family Map</h2>
+    <p class="tagline">They're all relatives</p>
+    <p>None of these distributions stands alone. Each arrow below is a recipe that turns one into another. Click any box to see its connections.</p>
+
+    <div class="card">
+      <svg class="chart" id="fm" viewBox="0 0 640 400" role="img" aria-label="How the distributions connect"></svg>
+      <div class="fm-info" id="fm-info"><span class="hint">Click a distribution to explore it.</span></div>
+    </div>
+
+    <h3>Cheat sheet</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Distribution</th><th>Counts…</th><th>PMF</th><th>Mean</th><th>Variance</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Uniform</td><td>one of n equal outcomes</td><td>\(\frac{1}{n}\)</td><td>\(\frac{n+1}{2}\)</td><td>\(\frac{n^2-1}{12}\)</td><td class="ex">a fair die</td></tr>
+          <tr><td>Bernoulli</td><td>success (1) or failure (0) in one try</td><td>\(p^x(1-p)^{1-x}\)</td><td>\(p\)</td><td>\(p(1-p)\)</td><td class="ex">one free throw</td></tr>
+          <tr><td>Binomial</td><td>successes in n tries</td><td>\(\binom{n}{k}p^k(1-p)^{n-k}\)</td><td>\(np\)</td><td>\(np(1-p)\)</td><td class="ex">heads in 10 flips</td></tr>
+          <tr><td>Geometric</td><td>tries until the first success</td><td>\((1-p)^{x-1}p\)</td><td>\(\frac{1}{p}\)</td><td>\(\frac{1-p}{p^2}\)</td><td class="ex">rolls until a 6</td></tr>
+          <tr><td>Negative Binomial</td><td>tries until r successes</td><td>\(\binom{x-1}{r-1}p^r(1-p)^{x-r}\)</td><td>\(\frac{r}{p}\)</td><td>\(\frac{r(1-p)}{p^2}\)</td><td class="ex">calls until 3 sales</td></tr>
+          <tr><td>Poisson</td><td>events in a fixed window</td><td>\(\frac{\lambda^k e^{-\lambda}}{k!}\)</td><td>\(\lambda\)</td><td>\(\lambda\)</td><td class="ex">calls per hour</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Which one do I need?</h3>
+    <div class="rules">
+      <div class="rule"><b>Is it one yes/no try?</b><span>→ Bernoulli</span></div>
+      <div class="rule"><b>Fixed number of tries, count successes?</b><span>→ Binomial</span></div>
+      <div class="rule"><b>Fixed number of successes, count tries?</b><span>→ Negative Binomial (Geometric if just one)</span></div>
+      <div class="rule"><b>No tries at all, just a rate over time or space?</b><span>→ Poisson</span></div>
+    </div>
+  </section>
+</main>
+<div id="tip"></div>
+
+<!-- Quiz modal (one shared dialog; questions come from QUIZZES in the script) -->
+<div class="qz-scrim" id="qz-scrim"></div>
+<div class="qz-modal" id="qz-modal" role="dialog" aria-modal="true" aria-labelledby="qz-title">
+  <div class="qz-head">
+    <div><div class="eyebrow" id="qz-stage"></div><h3 id="qz-title">Quiz</h3></div>
+    <button class="ex-close" id="qz-close" aria-label="Close quiz">✕</button>
+  </div>
+  <div class="qz-prog" id="qz-prog"></div>
+  <div class="qz-body" id="qz-body" aria-live="polite"></div>
+</div>
+
+<!-- Worked-examples sidebars (one per stage, shared scrim) -->
+<div class="ex-scrim" id="ex-scrim"></div>
+<aside class="ex-panel" id="bx-panel" role="dialog" aria-modal="true" aria-labelledby="bx-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Binomial</div><h3 id="bx-title">Worked examples</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Exams · "exactly"</div>
+      <h4>Guessing on a quiz</h4>
+      <p>A quiz has 10 multiple-choice questions, each with 4 options. You guess every answer at random.</p>
+      <p class="ex-q">What's the chance you get exactly 3 right?</p>
+      <ol class="ex-steps">
+        <li>Check: 10 fixed questions, each right or wrong, \(p = 1/4\) every time, guesses independent. So \(X \sim \text{Bin}(10,\ 0.25)\).</li>
+        <li>Arrangements: \(\binom{10}{3} = 120\) ways to pick which 3 are right.</li>
+        <li>One arrangement: \(0.25^3 \times 0.75^7 = 0.015625 \times 0.1335 \approx 0.002086\).</li>
+        <li>Multiply: \(120 \times 0.002086 \approx 0.250\).</li>
+      </ol>
+      <div class="ex-ans">P(X = 3) ≈ 0.250, about 1 in 4</div>
+      <button class="ex-try" data-n="10" data-p="0.25" data-k="3" data-mode="eq">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Quality control · "at most"</div>
+      <h4>Faulty bulbs in a box</h4>
+      <p>A factory's bulbs are faulty 5% of the time, independently. A box holds 20 bulbs.</p>
+      <p class="ex-q">What's the chance the box has at most 1 faulty bulb?</p>
+      <ol class="ex-steps">
+        <li>Check: 20 fixed bulbs, each faulty or fine, \(p = 0.05\), independent. So \(X \sim \text{Bin}(20,\ 0.05)\).</li>
+        <li>"At most 1" is the CDF: \(F(1) = P(0) + P(1)\).</li>
+        <li>\(P(0) = 0.95^{20} \approx 0.358\)</li>
+        <li>\(P(1) = \binom{20}{1}\,0.05 \times 0.95^{19} = 20 \times 0.05 \times 0.377 \approx 0.377\)</li>
+        <li>Add: \(0.358 + 0.377 = 0.736\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≤ 1) ≈ 0.736, about 3 boxes in 4</div>
+      <button class="ex-try" data-n="20" data-p="0.05" data-k="1" data-mode="le">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Marketing · "at least"</div>
+      <h4>Will anyone click the ad?</h4>
+      <p>30 people see an ad. Each clicks with chance 10%, independently of the others.</p>
+      <p class="ex-q">What's the chance at least 1 person clicks?</p>
+      <ol class="ex-steps">
+        <li>Check: 30 fixed viewers, click or no click, \(p = 0.1\), independent. So \(X \sim \text{Bin}(30,\ 0.1)\).</li>
+        <li>"At least 1" means adding 30 bars, so use the flip: \(P(X \ge 1) = 1 - F(0) = 1 - P(0)\).</li>
+        <li>\(P(0) = 0.9^{30} \approx 0.042\): nobody clicks.</li>
+        <li>\(1 - 0.042 = 0.958\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≥ 1) ≈ 0.958, almost certain</div>
+      <button class="ex-try" data-n="30" data-p="0.1" data-k="1" data-mode="ge">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+
+<aside class="ex-panel" id="fx-panel" role="dialog" aria-modal="true" aria-labelledby="fx-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Foundations</div><h3 id="fx-title">Worked examples</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Mean &amp; spread</div>
+      <h4>A fair die's balance point</h4>
+      <p>You roll one fair six-sided die. Each face has chance \(1/6\).</p>
+      <p class="ex-q">What are the mean and the standard deviation of the roll?</p>
+      <ol class="ex-steps">
+        <li>Mean: each face times its chance, added up: \(\mu = (1 + 2 + \dots + 6) \times \frac{1}{6} = \frac{21}{6} = 3.5\).</li>
+        <li>Squared distances from 3.5: \(6.25,\ 2.25,\ 0.25,\ 0.25,\ 2.25,\ 6.25\), which add to 17.5.</li>
+        <li>Variance: \(\sigma^2 = 17.5 \times \frac{1}{6} \approx 2.917\).</li>
+        <li>Standard deviation: \(\sigma = \sqrt{2.917} \approx 1.71\).</li>
+      </ol>
+      <div class="ex-ans">μ = 3.5, σ ≈ 1.71</div>
+      <button class="ex-try" data-die="fair" data-msg="Example loaded: a fair die. The balance point sits at &lt;b&gt;μ = 3.50&lt;/b&gt;, and the shaded band is μ ± σ ≈ 3.50 ± &lt;b&gt;1.71&lt;/b&gt;.">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">CDF · "at most"</div>
+      <h4>Rolling 4 or less</h4>
+      <p>Same fair die.</p>
+      <p class="ex-q">What's the chance the roll is 4 or less?</p>
+      <ol class="ex-steps">
+        <li>"At most 4" is the CDF: \(F(4) = P(1) + P(2) + P(3) + P(4)\).</li>
+        <li>Each bar is \(1/6\), and there are 4 of them: \(4 \times \frac{1}{6} = \frac{4}{6}\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≤ 4) = 2/3 ≈ 0.667</div>
+      <button class="ex-try" data-die="fair" data-k="4" data-mode="le">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Loaded die · "or"</div>
+      <h4>An even number on a loaded die</h4>
+      <p>A loaded die lands on 6 with chance 0.6. The other five faces get 0.08 each. Check: \(5 \times 0.08 + 0.6 = 1\).</p>
+      <p class="ex-q">What's the chance of an even number?</p>
+      <ol class="ex-steps">
+        <li>The even faces are 2, 4 and 6, and only one face can come up, so add their bars.</li>
+        <li>\(P(2) + P(4) + P(6) = 0.08 + 0.08 + 0.6 = 0.76\).</li>
+        <li>Bonus: the mean moves to \(0.08 \times (1+2+3+4+5) + 0.6 \times 6 = 1.2 + 3.6 = 4.8\).</li>
+      </ol>
+      <div class="ex-ans">P(X is even) = 0.76</div>
+      <button class="ex-try" data-die="load" data-k="2" data-mode="mult">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+
+<aside class="ex-panel" id="ux-panel" role="dialog" aria-modal="true" aria-labelledby="ux-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Discrete Uniform</div><h3 id="ux-title">Worked examples</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Raffle · "at least"</div>
+      <h4>A high ticket number</h4>
+      <p>A raffle has 20 tickets numbered 1 to 20, and one is drawn at random.</p>
+      <p class="ex-q">What's the chance the winning number is 16 or higher?</p>
+      <ol class="ex-steps">
+        <li>Check: 20 outcomes, no favourites. So \(X \sim \text{Uniform}(1, 20)\), each with chance \(1/20 = 0.05\).</li>
+        <li>16 or higher means 16, 17, 18, 19, 20: five outcomes.</li>
+        <li>Add their bars: \(5 \times 0.05 = 0.25\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≥ 16) = 5/20 = 0.25</div>
+      <button class="ex-try" data-n="20" data-k="16" data-mode="ge">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Dice · "multiple of"</div>
+      <h4>A 12-sided die</h4>
+      <p>You roll a fair 12-sided die.</p>
+      <p class="ex-q">What's the chance the roll is a multiple of 3?</p>
+      <ol class="ex-steps">
+        <li>Each face has chance \(1/12\).</li>
+        <li>The multiples of 3 are 3, 6, 9, 12: four faces.</li>
+        <li>\(4 \times \frac{1}{12} = \frac{1}{3}\).</li>
+      </ol>
+      <div class="ex-ans">P(multiple of 3) = 1/3 ≈ 0.333</div>
+      <button class="ex-try" data-n="12" data-k="3" data-mode="mult">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Mean &amp; spread</div>
+      <h4>An 8-sided die</h4>
+      <p>You roll a fair 8-sided die.</p>
+      <p class="ex-q">What are its mean and variance, and how often does it land above the mean?</p>
+      <ol class="ex-steps">
+        <li>Mean: \(\mu = \frac{n+1}{2} = \frac{9}{2} = 4.5\).</li>
+        <li>Variance: \(\sigma^2 = \frac{n^2 - 1}{12} = \frac{63}{12} = 5.25\), so \(\sigma \approx 2.29\).</li>
+        <li>Above 4.5 means 5, 6, 7 or 8: \(4 \times \frac{1}{8} = 0.5\). A symmetric shape splits evenly around its mean.</li>
+      </ol>
+      <div class="ex-ans">μ = 4.5, σ² = 5.25, P(X ≥ 5) = 0.5</div>
+      <button class="ex-try" data-n="8" data-k="5" data-mode="ge">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+
+<aside class="ex-panel" id="be-panel" role="dialog" aria-modal="true" aria-labelledby="be-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Bernoulli</div><h3 id="be-title">Worked examples</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Sports · the failure bar</div>
+      <h4>Missing a free throw</h4>
+      <p>A player makes 70% of free throws. Score one shot as 1 if it goes in, 0 if it misses.</p>
+      <p class="ex-q">What's the chance of a miss, and what are the mean and variance?</p>
+      <ol class="ex-steps">
+        <li>Check: one try, two outcomes. So \(X \sim \text{Bernoulli}(0.7)\).</li>
+        <li>Miss: \(P(X = 0) = 1 - p = 1 - 0.7 = 0.3\).</li>
+        <li>Mean: \(\mu = p = 0.7\). Variance: \(\sigma^2 = p(1-p) = 0.7 \times 0.3 = 0.21\).</li>
+      </ol>
+      <div class="ex-ans">P(X = 0) = 0.3 · μ = 0.7 · σ² = 0.21</div>
+      <button class="ex-try" data-p="0.7" data-k="0" data-mode="eq">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Quality control · rare event</div>
+      <h4>Is this part faulty?</h4>
+      <p>A machine makes a faulty part 5% of the time. Check one part and score 1 if it's faulty.</p>
+      <p class="ex-q">What's the chance it's faulty, and how unpredictable is the check?</p>
+      <ol class="ex-steps">
+        <li>"Success" here is the thing you're counting, a faulty part, so \(p = 0.05\).</li>
+        <li>\(P(X = 1) = 0.05\), and \(P(X = 0) = 0.95\).</li>
+        <li>\(\sigma^2 = 0.05 \times 0.95 = 0.0475\): tiny, because the answer is almost always "fine".</li>
+      </ol>
+      <div class="ex-ans">P(X = 1) = 0.05 · σ² = 0.0475</div>
+      <button class="ex-try" data-p="0.05" data-k="1" data-mode="eq">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Spread · variance</div>
+      <h4>The least predictable coin</h4>
+      <p>Compare a fair coin (\(p = 0.5\)) with a coin that lands heads 90% of the time.</p>
+      <p class="ex-q">Which one is harder to predict?</p>
+      <ol class="ex-steps">
+        <li>Fair coin: \(\sigma^2 = 0.5 \times 0.5 = 0.25\).</li>
+        <li>90% coin: \(\sigma^2 = 0.9 \times 0.1 = 0.09\).</li>
+        <li>\(p(1-p)\) is largest at \(p = 0.5\), so the fair coin is the least predictable of all.</li>
+      </ol>
+      <div class="ex-ans">σ² = 0.25 (fair) vs 0.09 (90% coin)</div>
+      <button class="ex-try" data-p="0.5" data-msg="Example loaded: p = 0.5. The variance chip shows σ² = &lt;b&gt;0.250&lt;/b&gt;, the largest it can be. Slide p to 0.9 and it drops to 0.090.">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+
+<aside class="ex-panel" id="nbx-panel" role="dialog" aria-modal="true" aria-labelledby="nbx-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Negative Binomial</div><h3 id="nbx-title">Worked examples</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Sales · "exactly"</div>
+      <h4>The third deal on call 10</h4>
+      <p>A salesperson closes 20% of calls, independently. They keep calling until they close 3 deals.</p>
+      <p class="ex-q">What's the chance the 3rd deal comes on exactly the 10th call?</p>
+      <ol class="ex-steps">
+        <li>Check: fixed number of successes \(r = 3\), \(p = 0.2\), count the tries. So \(X \sim \text{NegBin}(3,\ 0.2)\).</li>
+        <li>Call 10 is a deal, and the first 9 calls hold exactly 2 deals: \(\binom{9}{2} = 36\) orders.</li>
+        <li>One order: \(0.2^3 \times 0.8^7 = 0.008 \times 0.2097 \approx 0.001678\).</li>
+        <li>Multiply: \(36 \times 0.001678 \approx 0.0604\). (On average it takes \(r/p = 15\) calls.)</li>
+      </ol>
+      <div class="ex-ans">P(X = 10) ≈ 0.060, about 1 in 17</div>
+      <button class="ex-try" data-r="3" data-p="0.2" data-k="10" data-mode="eq">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Geometric · "more than"</div>
+      <h4>Getting through on the phone</h4>
+      <p>Each time you ring a busy helpline, you get through with chance 0.3, independently.</p>
+      <p class="ex-q">What's the chance you need more than 3 tries?</p>
+      <ol class="ex-steps">
+        <li>Waiting for the first success is Geometric: Negative Binomial with \(r = 1\), \(p = 0.3\).</li>
+        <li>"More than 3 tries" means the first 3 all fail, so there's no need to add up the endless tail.</li>
+        <li>\(P(X \ge 4) = 0.7^3 = 0.343\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≥ 4) = 0.343, about 1 in 3</div>
+      <button class="ex-try" data-r="1" data-p="0.3" data-k="4" data-mode="ge">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Sports · "at most"</div>
+      <h4>Winning a best-of-7 series</h4>
+      <p>A team wins each game with chance 0.6, independently. A best-of-7 series goes to the first team with 4 wins.</p>
+      <p class="ex-q">What's the chance the team gets its 4 wins within 7 games?</p>
+      <ol class="ex-steps">
+        <li>Count games until the 4th win: \(X \sim \text{NegBin}(4,\ 0.6)\). Winning the series means \(X \le 7\).</li>
+        <li>\(P(4) = 0.6^4 = 0.1296\)</li>
+        <li>\(P(5) = \binom{4}{3}\,0.6^4\,0.4 = 0.2074\), \(P(6) = \binom{5}{3}\,0.6^4\,0.4^2 = 0.2074\)</li>
+        <li>\(P(7) = \binom{6}{3}\,0.6^4\,0.4^3 = 0.1659\)</li>
+        <li>Add: \(0.1296 + 0.2074 + 0.2074 + 0.1659 \approx 0.710\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≤ 7) ≈ 0.710</div>
+      <button class="ex-try" data-r="4" data-p="0.6" data-k="7" data-mode="le">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+
+<aside class="ex-panel" id="px-panel" role="dialog" aria-modal="true" aria-labelledby="px-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Poisson</div><h3 id="px-title">Worked examples</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Help desk · "none"</div>
+      <h4>A completely quiet hour</h4>
+      <p>A help desk gets on average 4 calls an hour, at random moments.</p>
+      <p class="ex-q">What's the chance of no calls at all in the next hour?</p>
+      <ol class="ex-steps">
+        <li>Check: random events at a steady rate, counted in a fixed window. So \(X \sim \text{Poisson}(4)\).</li>
+        <li>\(P(X = 0) = \frac{4^0 e^{-4}}{0!} = e^{-4}\).</li>
+        <li>\(e^{-4} \approx 0.0183\).</li>
+      </ol>
+      <div class="ex-ans">P(X = 0) ≈ 0.018, about 1 hour in 55</div>
+      <button class="ex-try" data-l="4" data-k="0" data-mode="eq">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Publishing · "at most"</div>
+      <h4>Typos on a page</h4>
+      <p>A draft has on average 2.5 typos per page.</p>
+      <p class="ex-q">What's the chance a page has at most 1 typo?</p>
+      <ol class="ex-steps">
+        <li>\(X \sim \text{Poisson}(2.5)\). "At most 1" is \(F(1) = P(0) + P(1)\).</li>
+        <li>\(P(0) = e^{-2.5} \approx 0.082\)</li>
+        <li>\(P(1) = 2.5\,e^{-2.5} \approx 0.205\)</li>
+        <li>Add: \(0.082 + 0.205 = 0.287\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≤ 1) ≈ 0.287</div>
+      <button class="ex-try" data-l="2.5" data-k="1" data-mode="le">Try it in the chart →</button>
+    </article>
+
+    <article class="ex-item">
+      <div class="ex-tag">Scaling λ · "at least"</div>
+      <h4>A busy two-hour shift</h4>
+      <p>Same help desk, 4 calls an hour on average. Your shift lasts 2 hours.</p>
+      <p class="ex-q">What's the chance you take at least 10 calls?</p>
+      <ol class="ex-steps">
+        <li>λ belongs to the window: \(\lambda = 4 \times 2 = 8\) calls per shift.</li>
+        <li>"At least 10" is an endless tail, so flip it: \(P(X \ge 10) = 1 - F(9)\).</li>
+        <li>\(F(9) = P(0) + \dots + P(9) \approx 0.717\).</li>
+        <li>\(1 - 0.717 = 0.283\).</li>
+      </ol>
+      <div class="ex-ans">P(X ≥ 10) ≈ 0.283</div>
+      <button class="ex-try" data-l="8" data-k="10" data-mode="ge">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const fmt = (v, d = 3) => (+v).toFixed(d);
+const niceMax = v => [0.06, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.8, 1].find(s => s >= v * 1.12) || 1;
+
+// ---------- tooltip ----------
+const tip = document.getElementById('tip');
+function showTip(e, html) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY - r.height - 12;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y < 8) y = e.clientY + 16;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => { tip.style.opacity = 0; };
+
+// ---------- generic bar chart ----------
+// state: { xs, p, emp?, mean?, sd?, hl?(i)->'hl'|'dim'|'', names? }
+function BarChart(svg, o = {}) {
+  const W = 640, H = o.H || 280, padL = 44, padR = 16, padT = 30, padB = 46;
+  const plotH = H - padT - padB, plotW = W - padL - padR;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  let st, yMax, drag = null;
+
+  function render(s) {
+    st = s; svg.innerHTML = '';
+    const n = s.p.length, slot = plotW / n, bw = Math.min(slot * 0.62, 56);
+    yMax = o.yMax || niceMax(Math.max(...s.p, ...(s.emp || [0])));
+    const y = v => padT + plotH * (1 - v / yMax), y0 = y(0);
+    const cx = i => padL + slot * i + slot / 2;
+    const xv = v => padL + slot * (v - s.xs[0]) + slot / 2;
+
+    if (s.sd != null && s.sd > 1e-9) {
+      const a = Math.max(padL, xv(s.mean - s.sd)), b = Math.min(W - padR, xv(s.mean + s.sd));
+      mk('rect', { x: a, y: padT, width: Math.max(0, b - a), height: plotH, class: 'sd-band' }, svg);
+    }
+    const step = yMax <= 0.12 ? 0.02 : yMax <= 0.3 ? 0.05 : yMax <= 0.6 ? 0.1 : 0.2;
+    for (let t = 0; t * step <= yMax + 1e-9; t++) {
+      const v = t * step;
+      mk('line', { x1: padL, x2: W - padR, y1: y(v), y2: y(v), class: t ? 'grid' : 'base' }, svg);
+      mk('text', { x: padL - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'lbl' }, svg).textContent = fmt(v, 2);
+    }
+    const every = n > 100 ? 20 : n > 50 ? 10 : n > 24 ? 5 : n > 12 ? 2 : 1;
+    s.p.forEach((q, i) => {
+      const g = mk('g', { class: 'bar-g' + (drag === i ? ' active' : '') }, svg);
+      const top = y(q), cls = s.hl ? s.hl(i) : '';
+      mk('rect', { class: 'bar ' + cls, x: cx(i) - bw / 2, y: top, width: bw, height: Math.max(0, y0 - top), rx: Math.min(4, bw / 4) }, g);
+      if (o.draggable) mk('circle', { class: 'handle', cx: cx(i), cy: top, r: 6 }, g);
+      if (n <= 12 && !s.emp && !s.dots) mk('text', { class: 'val', x: cx(i), y: top - (o.draggable ? 13 : 7), 'text-anchor': 'middle' }, g).textContent = fmt(q);
+      if (s.xs[i] % every === 0 || s.names)
+        mk('text', { class: 'lbl', x: cx(i), y: H - 10, 'text-anchor': 'middle' }, g).textContent = s.names ? s.names[i] : s.xs[i];
+    });
+    if (s.emp) s.emp.forEach((q, i) => {
+      const w = bw / 2 + 4;
+      mk('line', { class: 'emp', x1: cx(i) - w, x2: cx(i) + w, y1: y(q), y2: y(q) }, svg);
+    });
+    if (s.dots) s.dots.forEach((q, i) => mk('circle', { class: 'ovl', cx: cx(i), cy: y(q), r: 4.5 }, svg));
+    if (s.mean != null) {
+      const x = xv(s.mean);
+      mk('line', { class: 'mean-line', x1: x, x2: x, y1: padT - 4, y2: y0 }, svg);
+      mk('path', { class: 'fulcrum', d: `M${x},${y0 + 2} l-8,13 h16 z` }, svg);
+      const anchor = x < padL + 40 ? 'start' : x > W - padR - 40 ? 'end' : 'middle';
+      mk('text', { class: 'mean-lbl', x, y: padT - 10, 'text-anchor': anchor }, svg).textContent = 'μ = ' + fmt(s.mean, 2);
+    }
+    s.p.forEach((_, i) => {
+      const hit = mk('rect', { class: 'hit', x: padL + slot * i, y: padT - 10, width: slot, height: plotH + 10 }, svg);
+      hit.addEventListener('pointermove', e => { if (o.tip && drag === null) showTip(e, o.tip(i)); o.onHover && o.onHover(i); });
+      hit.addEventListener('pointerleave', () => { hideTip(); o.onHover && o.onHover(null); });
+      if (o.draggable) hit.addEventListener('pointerdown', e => {
+        drag = i; hideTip(); svg.setPointerCapture(e.pointerId); o.onDrag(i, val(e));
+      });
+    });
+  }
+  const val = e => {
+    const r = svg.getBoundingClientRect();
+    return (1 - ((e.clientY - r.top) * (H / r.height) - padT) / plotH) * yMax;
+  };
+  if (o.draggable) {
+    svg.addEventListener('pointermove', e => { if (drag !== null) o.onDrag(drag, val(e)); });
+    const end = () => { if (drag !== null) { drag = null; render(st); } };
+    svg.addEventListener('pointerup', end);
+    svg.addEventListener('pointercancel', end);
+  }
+  return { render };
+}
+
+// ---------- CDF step chart ----------
+function CdfChart(svg, o = {}) {
+  const W = 640, H = 200, padL = 44, padR = 16, padT = 14, padB = 30;
+  const plotH = H - padT - padB, plotW = W - padL - padR;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  return {
+    render(xs, p, upTo) {
+      svg.innerHTML = '';
+      const n = p.length, slot = plotW / n;
+      const y = v => padT + plotH * (1 - v), cx = i => padL + slot * i + slot / 2;
+      let F = 0; const Fs = p.map(q => (F += q));
+      [0, 0.5, 1].forEach(t => {
+        mk('line', { x1: padL, x2: W - padR, y1: y(t), y2: y(t), class: t ? 'grid' : 'base' }, svg);
+        mk('text', { x: padL - 8, y: y(t) + 4, 'text-anchor': 'end', class: 'lbl' }, svg).textContent = t.toFixed(1);
+      });
+      mk('path', { class: 'step', d: `M${padL},${y(0)} H${cx(0)}` }, svg);
+      Fs.forEach((f, i) => {
+        const prev = i ? Fs[i - 1] : 0, x2 = i < n - 1 ? cx(i + 1) : W - padR;
+        const hl = upTo != null && i === upTo ? ' hl' : '';
+        mk('line', { class: 'jump', x1: cx(i), x2: cx(i), y1: y(prev), y2: y(f) }, svg);
+        mk('path', { class: 'step' + hl, d: `M${cx(i)},${y(f)} H${x2}` }, svg);
+        mk('circle', { class: 'odot', cx: cx(i), cy: y(prev), r: 4 }, svg);
+        mk('circle', { class: 'dot' + hl, cx: cx(i), cy: y(f), r: 4.5 }, svg);
+        if (i % Math.ceil(n / 16) === 0) mk('text', { class: 'lbl', x: cx(i), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = xs[i];
+        const hit = mk('rect', { class: 'hit', x: padL + slot * i, y: padT, width: slot, height: plotH }, svg);
+        hit.addEventListener('pointermove', e => {
+          const terms = i < 6 ? p.slice(0, i + 1).map(q => fmt(q)).join(' + ')
+            : `P(X = ${xs[0]}) + … + P(X = ${xs[i]})`;
+          showTip(e, `P(X ≤ ${xs[i]}) = ${terms}<br>= <b>${fmt(f)}</b>`);
+          o.onHover && o.onHover(i);
+        });
+        hit.addEventListener('pointerleave', () => { hideTip(); o.onHover && o.onHover(null); });
+      });
+    }
+  };
+}
+
+const stats = (xs, p) => {
+  const mu = p.reduce((a, q, i) => a + xs[i] * q, 0);
+  const v = p.reduce((a, q, i) => a + (xs[i] - mu) ** 2 * q, 0);
+  return { mu, v, sd: Math.sqrt(Math.max(0, v)) };
+};
+
+// simple sampler from a pmf
+const sample = p => { let r = Math.random(), i = 0; while (i < p.length - 1 && (r -= p[i]) > 0) i++; return i; };
+
+// ---------- worked examples: shared "Try it" helpers ----------
+// each stage registers exLoad[panelId] = dataset => chart id; data-k + data-mode pick the bars to light up
+const exLoad = {};
+const exModes = {
+  eq: k => [x => x === k, `P(X = ${k})`],
+  le: k => [x => x <= k, `P(X ≤ ${k})`],
+  ge: k => [x => x >= k, `P(X ≥ ${k})`],
+  mult: k => [x => x % k === 0, k === 2 ? 'P(X is even)' : `P(X is a multiple of ${k})`]
+};
+const exFocus = ds => ds.mode ? exModes[ds.mode](+ds.k) : [null, ''];
+// "at least" uses 1 − the rest, so a cut-off infinite tail doesn't shrink the answer
+function exMsg(ds, setting, xs, ps, test, sym) {
+  if (ds.msg) return ds.msg;
+  const sum = ds.mode === 'ge' ? 1 - ps.reduce((a, q, i) => test(xs[i]) ? a : a + q, 0)
+    : ps.reduce((a, q, i) => test(xs[i]) ? a + q : a, 0);
+  return `Example loaded: ${setting}. The orange bars add up to ${sym} = <b>${fmt(sum, 3)}</b>`;
+}
+
+// =============== STAGE 0 ===============
+(() => {
+  const xs = [1, 2, 3, 4, 5, 6];
+  let p = Array(6).fill(1 / 6), upTo = null, focus = null;
+  const res = document.getElementById('c0-res'), resText = res.textContent;
+  const chart = BarChart(document.getElementById('c0'), {
+    H: 300, yMax: 0.6, draggable: true, onDrag: setBar,
+    tip: i => `P(X = ${xs[i]}) = <b>${fmt(p[i])}</b>`
+  });
+  const cdf = CdfChart(document.getElementById('c0cdf'), { onHover: i => { upTo = i; render(); } });
+
+  function render() {
+    const s = stats(xs, p);
+    chart.render({ xs, p, mean: s.mu, sd: s.sd,
+      hl: i => upTo != null ? (i <= upTo ? 'hl' : 'dim') : focus ? (focus(xs[i]) ? 'hl' : 'dim') : '' });
+    cdf.render(xs, p, upTo);
+    document.getElementById('c0sum').textContent = 'Σ P(x) = ' + fmt(p.reduce((a, b) => a + b, 0));
+    document.getElementById('c0mu').textContent = 'μ = ' + fmt(s.mu, 2);
+    document.getElementById('c0sd').textContent = 'σ = ' + fmt(s.sd, 2);
+  }
+  // set bar i to v, rescale the rest so the total stays 1
+  function setBar(i, v) {
+    v = Math.min(Math.max(v, 0), 0.6);
+    unfocus();
+    const rest = p.reduce((a, b, j) => j === i ? a : a + b, 0);
+    p = p.map((q, j) => j === i ? v : rest > 1e-9 ? q * (1 - v) / rest : (1 - v) / 5);
+    render();
+  }
+  const fair = () => Array(6).fill(1 / 6), loaded = () => [0.08, 0.08, 0.08, 0.08, 0.08, 0.6];
+  function unfocus() { focus = null; res.textContent = resText; }
+  document.getElementById('c0fair').onclick = () => { p = fair(); unfocus(); render(); };
+  document.getElementById('c0load').onclick = () => { p = loaded(); unfocus(); render(); };
+  render();
+
+  exLoad['fx-panel'] = ds => {
+    p = ds.die === 'load' ? loaded() : fair(); upTo = null;
+    const [test, sym] = exFocus(ds);
+    focus = test;
+    res.innerHTML = exMsg(ds, ds.die === 'load' ? 'the loaded die' : 'a fair die', xs, p, test, sym);
+    render();
+    return 'c0';
+  };
+})();
+
+// =============== STAGE 1: Uniform ===============
+(() => {
+  const nEl = document.getElementById('u-n'), res = document.getElementById('u-res');
+  let counts, total, last = null, focus = null, upTo = null;
+  const cdf = CdfChart(document.getElementById('c1cdf'), { onHover: i => { upTo = i; render(); } });
+  const chart = BarChart(document.getElementById('c1'), {
+    tip: i => `P(X = ${i + 1}) = 1/${nEl.value} = <b>${fmt(1 / nEl.value)}</b>` +
+      (total ? `<br>observed: ${counts[i]}/${total} = ${fmt(counts[i] / total)}` : '')
+  });
+  function clear() { counts = Array(+nEl.value).fill(0); total = 0; last = null; focus = null; res.textContent = 'Roll the die to start.'; }
+  function render() {
+    const n = +nEl.value, xs = Array.from({ length: n }, (_, i) => i + 1), p = Array(n).fill(1 / n);
+    const s = stats(xs, p);
+    document.getElementById('u-n-v').textContent = n;
+    chart.render({ xs, p, mean: s.mu, emp: total ? counts.map(c => c / total) : null,
+      hl: i => upTo != null ? (i <= upTo ? 'hl' : 'dim') : focus ? (focus(xs[i]) ? 'hl' : 'dim') : i === last ? 'hl' : '' });
+    cdf.render(xs, p, upTo);
+    document.getElementById('u-stats').innerHTML =
+      `<div class="chips" style="flex-direction:column;align-items:flex-start">
+        <span class="chip">each P = 1/${n} = ${fmt(1 / n)}</span>
+        <span class="chip">μ = (n+1)/2 = ${fmt(s.mu, 2)}</span>
+        <span class="chip">σ² = (n²−1)/12 = ${fmt(s.v, 2)}</span></div>`;
+  }
+  function roll(k) {
+    const n = +nEl.value;
+    focus = null;
+    for (let j = 0; j < k; j++) { last = Math.floor(Math.random() * n); counts[last]++; total++; }
+    res.innerHTML = k === 1 ? `You rolled <b>${last + 1}</b> · ${total} roll${total > 1 ? 's' : ''} so far` : `<b>${total}</b> rolls so far`;
+    render();
+  }
+  nEl.oninput = () => { clear(); render(); };
+  document.getElementById('u-1').onclick = () => roll(1);
+  document.getElementById('u-600').onclick = () => roll(600);
+  document.getElementById('u-r').onclick = () => { clear(); render(); };
+  clear(); render();
+
+  exLoad['ux-panel'] = ds => {
+    const n = +ds.n, xs = Array.from({ length: n }, (_, i) => i + 1);
+    nEl.value = n; clear();
+    const [test, sym] = exFocus(ds);
+    focus = test;
+    res.innerHTML = exMsg(ds, `n = ${n}`, xs, Array(n).fill(1 / n), test, sym);
+    render();
+    return 'c1';
+  };
+})();
+
+// =============== STAGE 2: Bernoulli ===============
+(() => {
+  const pEl = document.getElementById('b-p'), coin = document.getElementById('b-coin'), res = document.getElementById('b-res');
+  let counts = [0, 0], total = 0, upTo = null, focus = null;
+  const cdf = CdfChart(document.getElementById('c2cdf'), { onHover: i => { upTo = i; render(); } });
+  const chart = BarChart(document.getElementById('c2'), {
+    H: 260,
+    tip: i => (i ? `P(X = 1) = p = <b>${fmt(+pEl.value, 2)}</b>` : `P(X = 0) = 1 − p = <b>${fmt(1 - pEl.value, 2)}</b>`) +
+      (total ? `<br>observed: ${counts[i]}/${total} = ${fmt(counts[i] / total)}` : '')
+  });
+  function render() {
+    const p = +pEl.value;
+    document.getElementById('b-p-v').textContent = p.toFixed(2);
+    chart.render({ xs: [0, 1], p: [1 - p, p], names: ['0 · failure', '1 · success'], mean: p,
+      emp: total ? counts.map(c => c / total) : null,
+      hl: i => upTo != null ? (i <= upTo ? 'hl' : 'dim') : focus ? (focus(i) ? 'hl' : 'dim') : '' });
+    cdf.render([0, 1], [1 - p, p], upTo);
+    document.getElementById('b-mu').textContent = 'μ = p = ' + fmt(p, 2);
+    document.getElementById('b-var').textContent = 'σ² = p(1−p) = ' + fmt(p * (1 - p), 3);
+  }
+  function flip(k) {
+    const p = +pEl.value; let x;
+    let bs = 0; focus = null;
+    for (let j = 0; j < k; j++) { x = Math.random() < p ? 1 : 0; counts[x]++; total++; bs += x; }
+    coin.className = 'coin'; void coin.offsetWidth;
+    coin.className = 'coin spin ' + (x ? 's' : 'f'); coin.textContent = x;
+    res.innerHTML = (k === 1 ? (x ? '<b>Success</b> · ' : '<b>Failure</b> · ') :
+      `This batch: <b>${bs.toLocaleString()}</b> successes in ${k.toLocaleString()} flips (${fmt(bs / k, 3)}) · `) +
+      `overall ${counts[1].toLocaleString()} in ${total.toLocaleString()} (${fmt(counts[1] / total, 3)})`;
+    render();
+  }
+  function clear() { counts = [0, 0]; total = 0; focus = null; coin.className = 'coin'; coin.textContent = '?'; res.textContent = 'Flip the coin.'; }
+  pEl.oninput = () => { clear(); render(); };
+  document.getElementById('b-1').onclick = () => flip(1);
+  const nIn = document.getElementById('b-n');
+  const flipN = () => {
+    const k = Math.round(+nIn.value);
+    if (!(k >= 1)) { nIn.value = 10; return; }
+    nIn.value = Math.min(k, 1000000);
+    flip(+nIn.value);
+  };
+  document.getElementById('b-100').onclick = flipN;
+  nIn.addEventListener('keydown', e => { if (e.key === 'Enter') flipN(); });
+  document.getElementById('b-r').onclick = () => { clear(); render(); };
+  render();
+
+  exLoad['be-panel'] = ds => {
+    const p = +ds.p;
+    pEl.value = p; clear();
+    const [test, sym] = exFocus(ds);
+    focus = test;
+    res.innerHTML = exMsg(ds, `p = ${p}`, [0, 1], [1 - p, p], test, sym);
+    render();
+    return 'c2';
+  };
+})();
+
+// =============== STAGE 3: Binomial ===============
+(() => {
+  const nEl = document.getElementById('n-n'), pEl = document.getElementById('n-p');
+  const trialsEl = document.getElementById('n-trials'), res = document.getElementById('n-res');
+  let counts, total, last = null, timer = null, upTo = null;
+  let focus = null; // bars picked by a worked example: k => bool
+  const cdf = CdfChart(document.getElementById('c3cdf'), { onHover: i => { upTo = i; render(); } });
+
+  const choose = (n, k) => { let c = 1; for (let i = 1; i <= k; i++) c = c * (n - k + i) / i; return c; };
+  const pmf = (n, p) => Array.from({ length: n + 1 }, (_, k) => choose(n, k) * p ** k * (1 - p) ** (n - k));
+
+  const chart = BarChart(document.getElementById('c3'), {
+    H: 300,
+    tip: k => {
+      const n = +nEl.value, p = +pEl.value;
+      return `P(X = ${k}) = C(${n},${k}) · ${p.toFixed(2)}<sup>${k}</sup> · ${(1 - p).toFixed(2)}<sup>${n - k}</sup>` +
+        `<br>= ${Math.round(choose(n, k)).toLocaleString()} × ${(p ** k * (1 - p) ** (n - k)).toExponential(2)}` +
+        `<br>= <b>${fmt(choose(n, k) * p ** k * (1 - p) ** (n - k), 4)}</b>` +
+        (total ? `<br>observed: ${counts[k]}/${total} = ${fmt(counts[k] / total)}` : '');
+    }
+  });
+
+  function drawTrials(outcomes) {
+    trialsEl.innerHTML = '';
+    const n = +nEl.value;
+    for (let i = 0; i < n; i++) {
+      const d = document.createElement('div');
+      d.className = 'tr' + (outcomes && outcomes[i] != null ? (outcomes[i] ? ' s' : ' f') : '');
+      trialsEl.appendChild(d);
+    }
+  }
+  function clear() {
+    clearInterval(timer); counts = Array(+nEl.value + 1).fill(0); total = 0; last = null; focus = null;
+    drawTrials(); res.textContent = 'Run an experiment: n trials, one at a time.';
+  }
+  function render() {
+    const n = +nEl.value, p = +pEl.value, xs = Array.from({ length: n + 1 }, (_, i) => i);
+    document.getElementById('n-n-v').textContent = n;
+    document.getElementById('n-p-v').textContent = p.toFixed(2);
+    const ps = pmf(n, p);
+    chart.render({ xs, p: ps, mean: n * p, sd: Math.sqrt(n * p * (1 - p)),
+      emp: total ? counts.map(c => c / total) : null,
+      hl: i => upTo != null ? (i <= upTo ? 'hl' : 'dim') : focus ? (focus(i) ? 'hl' : 'dim') : i === last ? 'hl' : '' });
+    cdf.render(xs, ps, upTo);
+    document.getElementById('n-mu').textContent = 'μ = np = ' + fmt(n * p, 2);
+    document.getElementById('n-sd').textContent = 'σ = √(np(1−p)) = ' + fmt(Math.sqrt(n * p * (1 - p)), 2);
+    document.getElementById('n-shape').innerHTML = describeShape(n, p, ps);
+  }
+  // plain-English reading of the current shape
+  function describeShape(n, p, ps) {
+    const mode = ps.indexOf(Math.max(...ps)), sd = Math.sqrt(n * p * (1 - p));
+    if (p === 0 || p === 1) return `With p = ${p}, every trial gives the same result, so all the probability sits on one bar (${p ? n : 0}).`;
+    let shape;
+    if (Math.abs(p - 0.5) < 0.005) shape = 'p = 0.5, so the shape is <b>perfectly symmetric</b>';
+    else if (n * p < 3) shape = 'the hump is <b>squashed against the left wall</b>, with a long tail to the right';
+    else if (n * (1 - p) < 3) shape = 'the hump is <b>squashed against the right wall</b>, with a long tail to the left';
+    else shape = `a gentle lean, with a slightly longer tail to the <b>${p < 0.5 ? 'right' : 'left'}</b>`;
+    return `Most likely count: <b>${mode}</b> (mean np = ${fmt(n * p, 1)}). Typical spread ±${fmt(sd, 2)}. Shape: ${shape}.`;
+  }
+  function runOne() {
+    clearInterval(timer);
+    const n = +nEl.value, p = +pEl.value;
+    const out = Array.from({ length: n }, () => Math.random() < p ? 1 : 0);
+    const shown = []; let i = 0;
+    last = null; focus = null; render();
+    timer = setInterval(() => {
+      shown.push(out[i++]); drawTrials(shown);
+      const s = shown.reduce((a, b) => a + b, 0);
+      res.innerHTML = `Trial ${i}/${n} · successes so far: <b>${s}</b>`;
+      if (i === n) {
+        clearInterval(timer);
+        last = s; counts[s]++; total++;
+        res.innerHTML = `<b>${s}</b> successes out of ${n} · ${total} experiment${total > 1 ? 's' : ''} so far`;
+        render();
+      }
+    }, Math.min(90, 900 / n));
+  }
+  function runMany(k) {
+    clearInterval(timer);
+    const n = +nEl.value, p = +pEl.value;
+    let out;
+    for (let j = 0; j < k; j++) {
+      out = Array.from({ length: n }, () => Math.random() < p ? 1 : 0);
+      counts[out.reduce((a, b) => a + b, 0)]++; total++;
+    }
+    last = null; focus = null; drawTrials(out);
+    res.innerHTML = `<b>${total}</b> experiments so far · orange marks show how often each count came up`;
+    render();
+  }
+  nEl.oninput = pEl.oninput = () => { clear(); render(); };
+  document.getElementById('n-1').onclick = runOne;
+  document.getElementById('n-500').onclick = () => runMany(500);
+  document.getElementById('n-r').onclick = () => { clear(); render(); };
+  clear(); render();
+
+  // "Try it": load n and p, highlight the bars the question asks about
+  exLoad['bx-panel'] = ds => {
+    const n = +ds.n, p = +ds.p, [test, sym] = exFocus(ds);
+    nEl.value = n; pEl.value = p;
+    clear();
+    focus = test;
+    res.innerHTML = exMsg(ds, `n = ${n}, p = ${p}`, Array.from({ length: n + 1 }, (_, i) => i), pmf(n, p), test, sym);
+    render();
+    return 'c3';
+  };
+})();
+
+// log-factorials for large-n PMFs
+const LF = [0];
+for (let i = 1; i <= 2000; i++) LF[i] = LF[i - 1] + Math.log(i);
+const logC = (n, k) => LF[n] - LF[k] - LF[n - k];
+
+// =============== STAGE 4: Negative Binomial ===============
+(() => {
+  const rEl = document.getElementById('nb-r'), pEl = document.getElementById('nb-p');
+  const trialsEl = document.getElementById('nb-trials'), res = document.getElementById('nb-res');
+  let dist, counts, total, last = null, timer = null, focus = null, upTo = null;
+  const cdf = CdfChart(document.getElementById('c4cdf'), { onHover: i => { upTo = i; render(); } });
+
+  function pmf(r, p) {
+    if (p >= 1) return { xs: [r], p: [1] };
+    const xs = [], ps = []; let cum = 0;
+    for (let x = r; xs.length < 150; x++) {
+      const q = Math.exp(logC(x - 1, r - 1) + r * Math.log(p) + (x - r) * Math.log(1 - p));
+      xs.push(x); ps.push(q); cum += q;
+      if (cum >= 0.995 && xs.length >= 8) break;
+    }
+    return { xs, p: ps };
+  }
+  const chart = BarChart(document.getElementById('c4'), {
+    H: 300,
+    tip: i => {
+      const r = +rEl.value, p = +pEl.value, x = dist.xs[i];
+      return `P(X = ${x}) = C(${x - 1},${r - 1}) · ${p.toFixed(2)}<sup>${r}</sup> · ${(1 - p).toFixed(2)}<sup>${x - r}</sup>` +
+        `<br>= <b>${fmt(dist.p[i], 4)}</b>` +
+        `<br>P(X ≤ ${x}) = ${fmt(dist.p.slice(0, i + 1).reduce((a, b) => a + b, 0))}` +
+        (total ? `<br>observed: ${counts[i]}/${total} = ${fmt(counts[i] / total)}` : '');
+    }
+  });
+  function clear() {
+    clearInterval(timer);
+    dist = pmf(+rEl.value, +pEl.value);
+    counts = Array(dist.p.length).fill(0); total = 0; last = null; focus = null;
+    trialsEl.innerHTML = ''; res.textContent = 'Run an experiment: keep trying until you hit r successes.';
+  }
+  function render() {
+    const r = +rEl.value, p = +pEl.value;
+    document.getElementById('nb-r-v').textContent = r + (r === 1 ? ' (Geometric)' : '');
+    document.getElementById('nb-p-v').textContent = p.toFixed(2);
+    chart.render({ xs: dist.xs, p: dist.p, mean: r / p, sd: Math.sqrt(r * (1 - p)) / p,
+      emp: total ? counts.map(c => c / total) : null,
+      hl: i => upTo != null ? (i <= upTo ? 'hl' : 'dim') : focus ? (focus(dist.xs[i]) ? 'hl' : 'dim') : dist.xs[i] === last ? 'hl' : '' });
+    cdf.render(dist.xs, dist.p, upTo);
+    document.getElementById('nb-mu').textContent = 'μ = r/p = ' + fmt(r / p, 2);
+    document.getElementById('nb-sd').textContent = 'σ = √(r(1−p))/p = ' + fmt(Math.sqrt(r * (1 - p)) / p, 2);
+  }
+  const trialsUntil = (r, p) => { const out = []; let s = 0; while (s < r) { const x = Math.random() < p ? 1 : 0; out.push(x); s += x; } return out; };
+  function record(x) { const i = x - dist.xs[0]; if (i < counts.length) counts[i]++; total++; }
+  function dot(x) { const d = document.createElement('div'); d.className = 'tr ' + (x ? 's' : 'f'); trialsEl.appendChild(d); }
+
+  function runOne() {
+    clearInterval(timer);
+    const r = +rEl.value, p = +pEl.value, out = trialsUntil(r, p);
+    trialsEl.innerHTML = ''; last = null; focus = null; render();
+    let i = 0, s = 0;
+    timer = setInterval(() => {
+      dot(out[i]); s += out[i++];
+      res.innerHTML = `Try ${i} · successes: <b>${s}/${r}</b>`;
+      if (i === out.length) {
+        clearInterval(timer); last = i; record(i);
+        res.innerHTML = `It took <b>${i}</b> tries to get ${r} success${r > 1 ? 'es' : ''} · ${total} experiment${total > 1 ? 's' : ''} so far`;
+        render();
+      }
+    }, Math.max(12, Math.min(90, 1500 / (r / p))));
+  }
+  function runMany(k) {
+    clearInterval(timer);
+    const r = +rEl.value, p = +pEl.value; let out;
+    for (let j = 0; j < k; j++) { out = trialsUntil(r, p); record(out.length); }
+    last = null; focus = null; trialsEl.innerHTML = ''; out.forEach(dot);
+    res.innerHTML = `<b>${total}</b> experiments so far · orange marks show how often each number of tries came up`;
+    render();
+  }
+  rEl.oninput = pEl.oninput = () => { clear(); render(); };
+  document.getElementById('nb-1').onclick = runOne;
+  document.getElementById('nb-500').onclick = () => runMany(500);
+  document.getElementById('nb-geo').onclick = () => { rEl.value = 1; rEl.oninput(); };
+  document.getElementById('nb-clr').onclick = () => { clear(); render(); };
+  clear(); render();
+
+  exLoad['nbx-panel'] = ds => {
+    rEl.value = ds.r; pEl.value = ds.p; clear();
+    const [test, sym] = exFocus(ds);
+    focus = test;
+    res.innerHTML = exMsg(ds, `r = ${ds.r}, p = ${ds.p}`, dist.xs, dist.p, test, sym);
+    render();
+    return 'c4';
+  };
+})();
+
+// =============== STAGE 5: Poisson ===============
+const poissonPmf = (lam, minLen = 11) => {
+  const ps = [Math.exp(-lam)]; let cum = ps[0];
+  for (let k = 1; cum < 0.999 || ps.length < minLen; k++) { ps.push(ps[k - 1] * lam / k); cum += ps[k]; }
+  return ps;
+};
+(() => {
+  const lEl = document.getElementById('po-l'), tl = document.getElementById('po-tl'), res = document.getElementById('po-res');
+  let ps, counts, total, last = null, timers = [], focus = null, upTo = null;
+  const cdf = CdfChart(document.getElementById('c5cdf'), { onHover: i => { upTo = i; render(); } });
+
+  const chart = BarChart(document.getElementById('c5'), {
+    H: 280,
+    tip: k => {
+      const lam = +lEl.value;
+      return `P(X = ${k}) = ${lam}<sup>${k}</sup> · e<sup>−${lam}</sup> / ${k}!<br>= <b>${fmt(ps[k], 4)}</b>` +
+        (total ? `<br>observed: ${counts[k]}/${total} = ${fmt(counts[k] / total)}` : '');
+    }
+  });
+  const sample = lam => { const L = Math.exp(-lam); let k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1; };
+
+  function drawTimeline(times, animate) {
+    tl.innerHTML = '';
+    mk('line', { class: 'tl-line', x1: 20, x2: 620, y1: 26, y2: 26 }, tl);
+    for (let m = 0; m <= 60; m += 10) {
+      const x = 20 + 600 * m / 60;
+      mk('line', { class: 'tl-tick', x1: x, x2: x, y1: 20, y2: 32 }, tl);
+      mk('text', { class: 'lbl', x, y: 54, 'text-anchor': 'middle' }, tl).textContent = m === 60 ? '60 min' : m;
+    }
+    (times || []).forEach(t => {
+      const add = () => mk('circle', { class: 'tl-ev' + (animate ? ' new' : ''), cx: 20 + 600 * t, cy: 26, r: 6 }, tl);
+      animate ? timers.push(setTimeout(add, t * 1800)) : add();
+    });
+  }
+  function stop() { timers.forEach(clearTimeout); timers = []; }
+  function clear() {
+    stop(); ps = poissonPmf(+lEl.value); counts = Array(ps.length).fill(0); total = 0; last = null; focus = null;
+    drawTimeline(); res.textContent = 'Each dot is one event at a random moment in the hour.';
+  }
+  function render() {
+    const lam = +lEl.value;
+    document.getElementById('po-l-v').textContent = lam;
+    chart.render({ xs: ps.map((_, k) => k), p: ps, mean: lam, sd: Math.sqrt(lam),
+      emp: total ? counts.map(c => c / total) : null,
+      hl: k => upTo != null ? (k <= upTo ? 'hl' : 'dim') : focus ? (focus(k) ? 'hl' : 'dim') : k === last ? 'hl' : '' });
+    cdf.render(ps.map((_, k) => k), ps, upTo);
+    document.getElementById('po-mu').textContent = 'mean = λ = ' + lam;
+    document.getElementById('po-var').textContent = 'variance = λ = ' + lam;
+  }
+  const record = k => { if (k < counts.length) counts[k]++; total++; };
+  const times = k => Array.from({ length: k }, Math.random).sort((a, b) => a - b);
+
+  function watch() {
+    stop(); last = null; focus = null; render();
+    const k = sample(+lEl.value), ts = times(k);
+    drawTimeline(ts, true);
+    res.textContent = 'Watching the hour…';
+    timers.push(setTimeout(() => {
+      last = k; record(k);
+      res.innerHTML = `<b>${k}</b> event${k === 1 ? '' : 's'} this hour · ${total} hour${total > 1 ? 's' : ''} so far`;
+      render();
+    }, 1850));
+  }
+  function many(n) {
+    stop(); focus = null; let k;
+    for (let j = 0; j < n; j++) { k = sample(+lEl.value); record(k); }
+    drawTimeline(times(k)); last = null;
+    res.innerHTML = `<b>${total}</b> hours simulated · the timeline shows the last one (${k} events)`;
+    render();
+  }
+  lEl.oninput = () => { clear(); render(); };
+  document.getElementById('po-1').onclick = watch;
+  document.getElementById('po-500').onclick = () => many(500);
+  document.getElementById('po-clr').onclick = () => { clear(); render(); };
+  clear(); render();
+
+  exLoad['px-panel'] = ds => {
+    lEl.value = ds.l; clear();
+    const [test, sym] = exFocus(ds);
+    focus = test;
+    res.innerHTML = exMsg(ds, `λ = ${ds.l}`, ps.map((_, k) => k), ps, test, sym);
+    render();
+    return 'c5';
+  };
+})();
+
+// Binomial → Poisson limit
+(() => {
+  const nEl = document.getElementById('bp-n'), lam = 3, K = 11;
+  const pois = poissonPmf(lam, K + 1).slice(0, K + 1);
+  const chart = BarChart(document.getElementById('c5b'), {
+    H: 260,
+    tip: k => {
+      const n = +nEl.value, b = binom(n, k);
+      return `k = ${k}<br>Binomial: ${fmt(b, 4)}<br>Poisson: ${fmt(pois[k], 4)}`;
+    }
+  });
+  const binom = (n, k) => {
+    const p = lam / n;
+    return k > n ? 0 : Math.exp(logC(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p));
+  };
+  function render() {
+    const n = +nEl.value, xs = Array.from({ length: K + 1 }, (_, k) => k), b = xs.map(k => binom(n, k));
+    let tv = 0; for (let k = 0; k <= n; k++) tv += Math.abs(binom(n, k) - (k <= K ? pois[k] : Math.exp(-lam) * lam ** k / Math.exp(LF[k])));
+    document.getElementById('bp-n-v').textContent = n;
+    document.getElementById('bp-p').textContent = `p = 3/${n} = ${fmt(lam / n, 3)}`;
+    document.getElementById('bp-gap').textContent = `difference = ${fmt(tv / 2, 3)}`;
+    chart.render({ xs, p: b, dots: pois });
+  }
+  nEl.oninput = render;
+  render();
+})();
+
+// =============== STAGE 6: Family map ===============
+(() => {
+  const svg = document.getElementById('fm'), info = document.getElementById('fm-info');
+  const H = 50;
+  const nodes = {
+    uniform:   { x: 100, y: 60,  w: 130, label: 'Uniform',   sub: 'n',     target: 'uniform',
+      desc: 'n equally likely outcomes. With n = 2 (outcomes 0 and 1) it is exactly a fair Bernoulli trial with p = 0.5.' },
+    bernoulli: { x: 330, y: 60,  w: 130, label: 'Bernoulli', sub: 'p',     target: 'bernoulli',
+      desc: 'The atom of the family: one try, success or failure. Every trial-based distribution is built by repeating it.' },
+    binomial:  { x: 200, y: 190, w: 130, label: 'Binomial',  sub: 'n, p',  target: 'binomial',
+      desc: 'Repeat Bernoulli n times and count the successes. With n = 1 it is Bernoulli again.' },
+    negbin:    { x: 480, y: 190, w: 180, label: 'Negative Binomial', sub: 'r, p', target: 'negbin',
+      desc: "Binomial's mirror image: fix the number of successes r, count the tries it takes." },
+    geometric: { x: 520, y: 330, w: 130, label: 'Geometric', sub: 'p',     target: 'negbin',
+      desc: 'Negative Binomial with r = 1: tries until the very first success. Its bars shrink by a factor (1 − p) each step.' },
+    poisson:   { x: 90,  y: 330, w: 130, label: 'Poisson',   sub: 'λ',     target: 'poisson',
+      desc: 'Counts random events at an average rate λ. It is what Binomial becomes when n is huge and p is tiny.' },
+    normal:    { x: 320, y: 330, w: 150, label: 'Normal',    sub: 'continuous', ext: true,
+      desc: 'Not discrete: the smooth bell curve. Binomial (large n) and Poisson (large λ) both approach it. A topic for a continuous-distributions explainer.' }
+  };
+  const edges = [
+    ['uniform', 'bernoulli', 'n = 2'],
+    ['bernoulli', 'binomial', 'repeat n times'],
+    ['bernoulli', 'negbin', 'repeat until r wins'],
+    ['binomial', 'poisson', 'n→∞, p→0'],
+    ['binomial', 'normal', 'large n'],
+    ['poisson', 'normal', 'large λ'],
+    ['negbin', 'geometric', 'r = 1']
+  ];
+  const defs = mk('defs', {}, svg);
+  ['fm-arrow', 'fm-arrow-on'].forEach(id => {
+    const m = mk('marker', { id, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+    mk('path', { d: 'M0,0 L10,5 L0,10 z' }, m);
+  });
+  const clip = (n, dx, dy) => {
+    const t = Math.min((n.w / 2 + 6) / Math.abs(dx || 1e-9), (H / 2 + 6) / Math.abs(dy || 1e-9));
+    return [n.x + dx * t, n.y + dy * t];
+  };
+  const edgeEls = edges.map(([a, b, label]) => {
+    const A = nodes[a], B = nodes[b], dx = B.x - A.x, dy = B.y - A.y;
+    const [x1, y1] = clip(A, dx, dy), [x2, y2] = clip(B, -dx, -dy);
+    const line = mk('line', { class: 'fm-edge', x1, y1, x2, y2, 'marker-end': 'url(#fm-arrow)' }, svg);
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, w = label.length * 7 + 12;
+    mk('rect', { class: 'fm-elbg', x: mx - w / 2, y: my - 10, width: w, height: 20, rx: 4 }, svg);
+    const txt = mk('text', { class: 'fm-elbl', x: mx, y: my + 4, 'text-anchor': 'middle' }, svg);
+    txt.textContent = label;
+    return { a, b, label, line, txt };
+  });
+  const nodeEls = {};
+  for (const id in nodes) {
+    const n = nodes[id];
+    const g = mk('g', { class: 'fm-node' + (n.ext ? ' ext' : ''), tabindex: 0, role: 'button' }, svg);
+    mk('rect', { x: n.x - n.w / 2, y: n.y - H / 2, width: n.w, height: H, rx: 10 }, g);
+    mk('text', { x: n.x, y: n.y - 2, 'text-anchor': 'middle' }, g).textContent = n.label;
+    mk('text', { class: 's', x: n.x, y: n.y + 15, 'text-anchor': 'middle' }, g).textContent = n.sub;
+    g.addEventListener('click', () => select(id));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(id); } });
+    nodeEls[id] = g;
+  }
+  function select(id) {
+    const n = nodes[id];
+    for (const k in nodeEls) nodeEls[k].classList.toggle('on', k === id);
+    const links = [];
+    edgeEls.forEach(e => {
+      const on = e.a === id || e.b === id;
+      e.line.classList.toggle('on', on); e.txt.classList.toggle('on', on);
+      e.line.setAttribute('marker-end', on ? 'url(#fm-arrow-on)' : 'url(#fm-arrow)');
+      if (e.a === id) links.push(`→ <b>${nodes[e.b].label}</b> when ${e.label}`);
+      if (e.b === id) links.push(`← from <b>${nodes[e.a].label}</b> when ${e.label}`);
+    });
+    info.innerHTML = `<h4>${n.label}</h4><p style="margin:0 0 6px">${n.desc}</p>` +
+      `<p class="note" style="margin:0 0 6px">${links.join(' · ')}</p>` +
+      (n.target ? `<a href="#${n.target}">Go to section →</a>` : '');
+  }
+})();
+
+// ---------- worked-examples sidebars ----------
+(() => {
+  const scrim = document.getElementById('ex-scrim');
+  let open = null, opener = null;
+  const close = (ret = true) => {
+    if (!open) return;
+    open.classList.remove('on'); document.body.classList.remove('ex-open');
+    if (ret && opener) opener.focus();
+    open = null;
+  };
+  document.querySelectorAll('[data-panel]').forEach(btn => btn.onclick = () => {
+    open = document.getElementById(btn.dataset.panel); opener = btn;
+    open.classList.add('on'); document.body.classList.add('ex-open');
+    open.querySelector('.ex-close').focus();
+  });
+  document.querySelectorAll('.ex-close').forEach(b => b.onclick = () => close());
+  scrim.onclick = () => close();
+  document.addEventListener('keydown', e => {
+    if (!open) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') { // keep focus inside the panel
+      const f = open.querySelectorAll('button'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  document.querySelectorAll('.ex-try').forEach(btn => btn.onclick = () => {
+    const id = btn.closest('.ex-panel').id;
+    close(false);
+    const chart = exLoad[id](btn.dataset);
+    document.getElementById(chart).closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+})();
+
+// ---------- quizzes ----------
+// question types: 'mc' (text options, optional vis), 'charts' (each option is a mini chart), 'pick' (tap a bar)
+// vis: { xs, p, hide?, hl?, cdf? } · after: the vis to show once answered
+const QUIZZES = {
+  basics: {
+    stage: 'Foundations',
+    qs: [
+      { type: 'mc', short: 'The missing bar',
+        q: 'One bar of this PMF is hidden. How tall must it be?',
+        vis: { xs: [1, 2, 3, 4], p: [0.1, 0.3, 0.4, 0.2], hide: 2 },
+        after: { xs: [1, 2, 3, 4], p: [0.1, 0.3, 0.4, 0.2], hl: 2 },
+        opts: ['0.2', '0.3', '0.4', '0.5'], ans: 2,
+        why: 'All the bars must add up to 1. The visible ones give \\(0.1 + 0.3 + 0.2 = 0.6\\), so the hidden bar is \\(1 - 0.6 = 0.4\\).' },
+      { type: 'charts', short: 'Spotting a valid PMF',
+        q: 'Only one of these could be a real PMF. Which one?',
+        opts: [{ xs: [0, 1, 2], p: [0.3, 0.4, 0.4] }, { xs: [0, 1, 2], p: [0.2, 0.5, 0.3] }, { xs: [0, 1, 2], p: [0.2, 0.2, 0.4] }],
+        ans: 1,
+        why: 'A adds up to 1.1 and C to only 0.8. B gives \\(0.2 + 0.5 + 0.3 = 1\\), with every bar between 0 and 1.' },
+      { type: 'pick', short: 'Finding the balance point',
+        q: 'Tap the outcome closest to the mean μ (the balance point).',
+        vis: { xs: [1, 2, 3, 4, 5], p: [0.1, 0.05, 0.05, 0.4, 0.4] }, ans: 3,
+        why: '\\(\\mu = 1(0.1) + 2(0.05) + 3(0.05) + 4(0.4) + 5(0.4) = 3.95\\). The two tall bars alone would balance at 4.5, but the small bars on the left pull it down to just under 4.' },
+      { type: 'mc', short: 'Reading a CDF',
+        q: 'This is a CDF, the running total of the bars. What is \\(P(X = 3)\\)?',
+        vis: { xs: [1, 2, 3, 4], p: [0.2, 0.3, 0.4, 0.1], cdf: true },
+        after: { xs: [1, 2, 3, 4], p: [0.2, 0.3, 0.4, 0.1], cdf: true, hl: 2 },
+        opts: ['0.9', '0.4', '0.5', '0.1'], ans: 1,
+        why: 'Each jump in the CDF is one bar. At 3 it climbs from 0.5 to 0.9, so \\(P(X = 3) = 0.9 - 0.5 = 0.4\\). The 0.9 is \\(P(X \\le 3)\\), not \\(P(X = 3)\\).' }
+    ]
+  },
+  uniform: {
+    stage: 'Discrete Uniform',
+    qs: [
+      { type: 'charts', short: 'Recognising Uniform',
+        q: 'Which of these is a discrete uniform distribution?',
+        opts: [{ xs: [1, 2, 3, 4], p: [0.25, 0.25, 0.25, 0.25] }, { xs: [1, 2, 3, 4], p: [0.1, 0.2, 0.3, 0.4] }, { xs: [1, 2, 3, 4], p: [0.2, 0.3, 0.3, 0.2] }],
+        ans: 0,
+        why: 'Uniform means no favourites: every outcome gets the same slice, \\(1/n\\). Only A has four equal bars of \\(1/4 = 0.25\\). C is symmetric, but its middle bars are taller.' },
+      { type: 'mc', short: '"At least" on an 8-sided die',
+        q: 'A fair 8-sided die. What is \\(P(X \\ge 6)\\)?',
+        vis: { xs: [1, 2, 3, 4, 5, 6, 7, 8], p: Array(8).fill(0.125) },
+        after: { xs: [1, 2, 3, 4, 5, 6, 7, 8], p: Array(8).fill(0.125), hl: [5, 6, 7] },
+        opts: ['0.25', '0.375', '0.5', '0.625'], ans: 1,
+        why: '6, 7 and 8 are three faces, each with chance \\(1/8\\): \\(3 \\times 0.125 = 0.375\\).' },
+      { type: 'mc', short: 'Mean of a 10-sided die',
+        q: 'A fair die with \\(n = 10\\) faces. Where does the balance point μ sit?',
+        vis: { xs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], p: Array(10).fill(0.1) },
+        after: { xs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], p: Array(10).fill(0.1), mean: 5.5 },
+        opts: ['5', '5.5', '6', '0.1'], ans: 1,
+        why: '\\(\\mu = \\frac{n+1}{2} = \\frac{11}{2} = 5.5\\): exactly halfway between 1 and 10. It doesn\'t have to be a face you can roll. (0.1 is the height of each bar, not the mean.)' },
+      { type: 'mc', short: 'What changes when n grows',
+        q: 'These are the bars for \\(n = 4\\). You change \\(n\\) to 5. What happens?',
+        vis: { xs: [1, 2, 3, 4], p: [0.25, 0.25, 0.25, 0.25] },
+        after: { xs: [1, 2, 3, 4, 5], p: [0.2, 0.2, 0.2, 0.2, 0.2] },
+        opts: ['Every bar shrinks to 0.2', 'The old bars stay 0.25 and the new one is 0.2', 'Every bar stays 0.25', 'Every bar grows to 0.3'], ans: 0,
+        why: 'The bars must still add up to 1, and now 5 outcomes share it equally: each becomes \\(1/5 = 0.2\\). Keeping the old bars at 0.25 would add up to 1.2.' }
+    ]
+  },
+  bernoulli: {
+    stage: 'Bernoulli',
+    qs: [
+      { type: 'mc', short: 'Finding p from the failure bar',
+        q: 'The failure bar is 0.35. What is \\(p\\), the chance of success?',
+        vis: { xs: [0, 1], p: [0.35, 0.65], hide: 1 },
+        after: { xs: [0, 1], p: [0.35, 0.65], hl: 1 },
+        opts: ['0.35', '0.65', '0.5', '1.35'], ans: 1,
+        why: 'There are only two outcomes, so they share the whole 1: \\(p = 1 - 0.35 = 0.65\\).' },
+      { type: 'charts', short: 'The least predictable trial',
+        q: 'Which of these trials is the hardest to predict (largest variance)?',
+        opts: [{ xs: [0, 1], p: [0.9, 0.1] }, { xs: [0, 1], p: [0.5, 0.5] }, { xs: [0, 1], p: [0.2, 0.8] }],
+        ans: 1,
+        why: 'Variance is \\(p(1-p)\\): A gives \\(0.1 \\times 0.9 = 0.09\\), B gives \\(0.5 \\times 0.5 = 0.25\\), C gives \\(0.8 \\times 0.2 = 0.16\\). A 50/50 trial is the least predictable.' },
+      { type: 'mc', short: 'The mean is p',
+        q: 'A free throw goes in with \\(p = 0.8\\), scored 1 for in and 0 for a miss. What is the mean of \\(X\\)?',
+        vis: { xs: [0, 1], p: [0.2, 0.8] },
+        after: { xs: [0, 1], p: [0.2, 0.8], mean: 0.8 },
+        opts: ['1', '0.8', '0.5', '0.2'], ans: 1,
+        why: '\\(\\mu = 0 \\times 0.2 + 1 \\times 0.8 = 0.8\\). The mean of a Bernoulli trial is always \\(p\\), even though a single shot can only score 0 or 1.' },
+      { type: 'mc', short: 'Reading p off the CDF',
+        q: 'This is the CDF of a Bernoulli trial. What is \\(p\\)?',
+        vis: { xs: [0, 1], p: [0.3, 0.7], cdf: true },
+        after: { xs: [0, 1], p: [0.3, 0.7], cdf: true, hl: 1 },
+        opts: ['0.3', '0.7', '1.0', '0.5'], ans: 1,
+        why: 'The CDF sits at \\(1 - p = 0.3\\) after 0, then jumps by \\(p\\) up to 1. The jump at 1 is \\(1 - 0.3 = 0.7\\).' }
+    ]
+  },
+  binomial: {
+    stage: 'Binomial',
+    qs: [
+      { type: 'charts', short: 'Recognising Bin(4, 0.5)',
+        q: 'Which chart is Binomial with \\(n = 4,\\ p = 0.5\\)?',
+        opts: [{ xs: [0, 1, 2, 3, 4], p: [0.4096, 0.4096, 0.1536, 0.0256, 0.0016] }, { xs: [0, 1, 2, 3, 4], p: [0.2, 0.2, 0.2, 0.2, 0.2] }, { xs: [0, 1, 2, 3, 4], p: [0.0625, 0.25, 0.375, 0.25, 0.0625] }],
+        ans: 2,
+        why: 'With \\(p = 0.5\\) the shape is symmetric around the mean \\(np = 2\\). A leans left (that\'s \\(p = 0.2\\)), and B is flat, which no Binomial with \\(n = 4\\) can be.' },
+      { type: 'pick', short: 'The most likely count',
+        q: 'Ten trials with \\(p = 0.3\\). Tap the most likely number of successes.',
+        vis: { xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], p: [0.0282, 0.1211, 0.2335, 0.2668, 0.2001, 0.1029, 0.0368, 0.009, 0.0014, 0.0001, 0] }, ans: 3,
+        why: 'The tallest bar sits next to the mean \\(np = 10 \\times 0.3 = 3\\): \\(P(X = 3) \\approx 0.267\\).' },
+      { type: 'mc', short: 'Exactly 2 heads in 4 flips',
+        q: 'Four fair coin flips. What is the chance of exactly 2 heads?',
+        vis: { xs: [0, 1, 2, 3, 4], p: [0.0625, 0.25, 0.375, 0.25, 0.0625], hide: 2 },
+        after: { xs: [0, 1, 2, 3, 4], p: [0.0625, 0.25, 0.375, 0.25, 0.0625], hl: 2 },
+        opts: ['0.25', '0.375', '0.5', '0.0625'], ans: 1,
+        why: 'There are \\(\\binom{4}{2} = 6\\) ways to place the 2 heads, and each way has chance \\(0.5^4 = 0.0625\\). So \\(6 \\times 0.0625 = 0.375\\). Or use the bars: \\(1 - 2(0.0625) - 2(0.25) = 0.375\\).' },
+      { type: 'mc', short: '"At least one" by flipping it',
+        q: 'Five trials with \\(p = 0.2\\). What is \\(P(X \\ge 1)\\)?',
+        vis: { xs: [0, 1, 2, 3, 4, 5], p: [0.3277, 0.4096, 0.2048, 0.0512, 0.0064, 0.0003] },
+        after: { xs: [0, 1, 2, 3, 4, 5], p: [0.3277, 0.4096, 0.2048, 0.0512, 0.0064, 0.0003], hl: [1, 2, 3, 4, 5] },
+        opts: ['0.328', '0.672', '0.2', '1.0'], ans: 1,
+        why: 'Rather than adding five bars, flip it: \\(P(X \\ge 1) = 1 - P(0) = 1 - 0.8^5 = 1 - 0.328 = 0.672\\). (0.328 is the chance of no successes at all.)' }
+    ]
+  },
+  negbin: {
+    stage: 'Negative Binomial',
+    qs: [
+      { type: 'charts', short: 'Where the bars start',
+        q: 'All three have the same shape. Which one could be Negative Binomial with \\(r = 3\\)?',
+        opts: [{ xs: [0, 1, 2, 3, 4, 5], p: [0.125, 0.1875, 0.1875, 0.1562, 0.1172, 0.082] }, { xs: [3, 4, 5, 6, 7, 8], p: [0.125, 0.1875, 0.1875, 0.1562, 0.1172, 0.082] }, { xs: [1, 2, 3, 4, 5, 6], p: [0.125, 0.1875, 0.1875, 0.1562, 0.1172, 0.082] }],
+        ans: 1,
+        why: '\\(X\\) counts tries, and you can\'t collect 3 successes in fewer than 3 tries. So the bars must start at \\(x = r = 3\\), as in B.' },
+      { type: 'pick', short: 'Geometric: the most likely wait',
+        q: 'Geometric with \\(p = 0.4\\): tries until the first success. Tap the single most likely number of tries.',
+        vis: { xs: [1, 2, 3, 4, 5, 6, 7, 8], p: [0.4, 0.24, 0.144, 0.0864, 0.0518, 0.0311, 0.0187, 0.0112] }, ans: 0,
+        why: 'Each bar is \\((1-p)\\) times the one before, so the bars only shrink: 1 try is always the most likely, whatever \\(p\\) is. The mean \\(1/p = 2.5\\) is further right, pulled by the long tail.' },
+      { type: 'mc', short: 'The average number of tries',
+        q: 'You need \\(r = 2\\) successes and each try succeeds with \\(p = 0.25\\). How many tries does it take on average?',
+        vis: { xs: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], p: [0.0625, 0.0938, 0.1055, 0.1055, 0.0989, 0.089, 0.0779, 0.0667, 0.0563, 0.0469, 0.0387, 0.0317, 0.0257, 0.0208, 0.0167, 0.0134, 0.0106, 0.0085, 0.0067] },
+        after: { xs: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], p: [0.0625, 0.0938, 0.1055, 0.1055, 0.0989, 0.089, 0.0779, 0.0667, 0.0563, 0.0469, 0.0387, 0.0317, 0.0257, 0.0208, 0.0167, 0.0134, 0.0106, 0.0085, 0.0067], mean: 8 },
+        opts: ['2', '4', '8', '0.5'], ans: 2,
+        why: '\\(\\mu = r/p = 2 / 0.25 = 8\\). Each success takes \\(1/p = 4\\) tries on average, and you need two of them. The mean sits right of the tallest bars because of the long tail.' },
+      { type: 'mc', short: 'Waiting more than 2 tries',
+        q: 'Geometric with \\(p = 0.5\\). What is the chance the first success needs more than 2 tries?',
+        vis: { xs: [1, 2, 3, 4, 5, 6], p: [0.5, 0.25, 0.125, 0.0625, 0.0312, 0.0156] },
+        after: { xs: [1, 2, 3, 4, 5, 6], p: [0.5, 0.25, 0.125, 0.0625, 0.0312, 0.0156], hl: [2, 3, 4, 5] },
+        opts: ['0.25', '0.5', '0.125', '0.75'], ans: 0,
+        why: '"More than 2 tries" means the first 2 tries both fail: \\(0.5^2 = 0.25\\). That covers the whole endless tail at once, so there\'s no need to add up the bars.' }
+    ]
+  },
+  poisson: {
+    stage: 'Poisson',
+    qs: [
+      { type: 'charts', short: 'Recognising λ = 1',
+        q: 'Which chart is Poisson with \\(\\lambda = 1\\)?',
+        opts: [{ xs: [0, 1, 2, 3, 4, 5, 6, 7], p: [0.0498, 0.1494, 0.224, 0.224, 0.168, 0.1008, 0.0504, 0.0216] }, { xs: [0, 1, 2, 3, 4, 5, 6, 7], p: [0.3679, 0.3679, 0.1839, 0.0613, 0.0153, 0.0031, 0.0005, 0.0001] }, { xs: [0, 1, 2, 3, 4, 5, 6, 7], p: [0.0067, 0.0337, 0.0842, 0.1404, 0.1755, 0.1755, 0.1462, 0.1044] }],
+        ans: 1,
+        why: 'The mean is \\(\\lambda\\), so with \\(\\lambda = 1\\) the bars pile up against 0: \\(P(0) = P(1) = e^{-1} \\approx 0.37\\). A is \\(\\lambda = 3\\) and C is \\(\\lambda = 5\\).' },
+      { type: 'pick', short: 'The most likely count',
+        q: 'A page has on average \\(\\lambda = 2.5\\) typos. Tap the most likely number of typos.',
+        vis: { xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], p: [0.0821, 0.2052, 0.2565, 0.2138, 0.1336, 0.0668, 0.0278, 0.0099, 0.0031, 0.0009] }, ans: 2,
+        why: '\\(P(2) \\approx 0.257\\) is the tallest bar. When \\(\\lambda\\) isn\'t a whole number, the most likely count is \\(\\lambda\\) rounded down.' },
+      { type: 'mc', short: 'Scaling λ to the window',
+        q: 'A shop gets on average 6 customers an hour (chart below). What is \\(\\lambda\\) for a 20-minute window?',
+        vis: { xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], p: [0.0025, 0.0149, 0.0446, 0.0892, 0.1339, 0.1606, 0.1606, 0.1377, 0.1033, 0.0688, 0.0413, 0.0225, 0.0113, 0.0052, 0.0022], mean: 6 },
+        after: { xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], p: [0.1353, 0.2707, 0.2707, 0.1804, 0.0902, 0.0361, 0.012, 0.0034, 0.0009, 0.0002], mean: 2 },
+        opts: ['6', '3', '2', '18'], ans: 2,
+        why: '\\(\\lambda\\) belongs to the window. 20 minutes is a third of an hour, so \\(\\lambda = 6 \\times \\frac{1}{3} = 2\\). The chart now shows Poisson(2): shifted left and narrower.' },
+      { type: 'mc', short: 'The chance of zero',
+        q: 'With \\(\\lambda = 2\\), what is the chance of no events at all?',
+        vis: { xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], p: [0.1353, 0.2707, 0.2707, 0.1804, 0.0902, 0.0361, 0.012, 0.0034, 0.0009, 0.0002], hide: 0 },
+        after: { xs: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], p: [0.1353, 0.2707, 0.2707, 0.1804, 0.0902, 0.0361, 0.012, 0.0034, 0.0009, 0.0002], hl: 0 },
+        opts: ['0.135', '0.271', '0.5', '0'], ans: 0,
+        why: 'Put \\(k = 0\\) into the PMF: \\(\\frac{2^0 e^{-2}}{0!} = e^{-2} \\approx 0.135\\). Zero is never impossible for a Poisson count, just unlikely when \\(\\lambda\\) is big.' }
+    ]
+  }
+};
+
+const katexIn = el => window.renderMathInElement && renderMathInElement(el,
+  { delimiters: [{ left: '$$', right: '$$', display: true }, { left: '\\(', right: '\\)', display: false }] });
+
+// small chart for quiz visuals; o.pick(i) makes bars tappable, o.cls(i) adds a class per bar
+function qzChart(svg, v, o = {}) {
+  const small = !!o.small, W = small ? 220 : 640, H = small ? 150 : 230;
+  const padL = small ? 8 : 44, padR = small ? 8 : 16, padT = small ? 22 : 26, padB = small ? 24 : 32;
+  const plotW = W - padL - padR, plotH = H - padT - padB, n = v.p.length, slot = plotW / n;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = '';
+  const cx = i => padL + slot * i + slot / 2;
+  const isHl = i => Array.isArray(v.hl) ? v.hl.includes(i) : v.hl === i;
+  if (v.cdf) {
+    const y = q => padT + plotH * (1 - q);
+    let F = 0; const Fs = v.p.map(q => (F += q));
+    [0, 0.5, 1].forEach(t => {
+      mk('line', { x1: padL, x2: W - padR, y1: y(t), y2: y(t), class: t ? 'grid' : 'base' }, svg);
+      if (!small) mk('text', { x: padL - 8, y: y(t) + 4, 'text-anchor': 'end', class: 'lbl' }, svg).textContent = t.toFixed(1);
+    });
+    mk('path', { class: 'step', d: `M${padL},${y(0)} H${cx(0)}` }, svg);
+    Fs.forEach((f, i) => {
+      const prev = i ? Fs[i - 1] : 0, x2 = i < n - 1 ? cx(i + 1) : W - padR, hl = isHl(i) ? ' hl' : '';
+      mk('line', { class: 'jump', x1: cx(i), x2: cx(i), y1: y(prev), y2: y(f), style: hl ? 'stroke:var(--accent);opacity:1;stroke-width:3;stroke-dasharray:none' : '' }, svg);
+      mk('path', { class: 'step' + hl, d: `M${cx(i)},${y(f)} H${x2}` }, svg);
+      mk('circle', { class: 'odot', cx: cx(i), cy: y(prev), r: 4 }, svg);
+      mk('circle', { class: 'dot' + hl, cx: cx(i), cy: y(f), r: 4.5 }, svg);
+      mk('text', { class: 'qz-flbl', x: cx(i) + 8, y: y(f) - 7 }, svg).textContent = f.toFixed(1);
+      mk('text', { class: 'lbl', x: cx(i), y: H - 10, 'text-anchor': 'middle' }, svg).textContent = v.xs[i];
+    });
+    return;
+  }
+  const yMax = niceMax(Math.max(...v.p)), y = q => padT + plotH * (1 - q / yMax), y0 = y(0);
+  const bw = Math.min(slot * 0.6, 64), every = n > 12 ? 2 : 1;
+  const dec = small && v.p.every(q => Math.abs(q * 10 - Math.round(q * 10)) < 1e-9) ? 1 : 2;
+  if (!small) {
+    const step = yMax <= 0.3 ? 0.1 : 0.2;
+    for (let t = 0; t * step <= yMax + 1e-9; t++)
+      mk('text', { x: padL - 8, y: y(t * step) + 4, 'text-anchor': 'end', class: 'lbl' }, svg).textContent = (t * step).toFixed(1);
+    for (let t = 1; t * step <= yMax + 1e-9; t++) mk('line', { x1: padL, x2: W - padR, y1: y(t * step), y2: y(t * step), class: 'grid' }, svg);
+  }
+  mk('line', { x1: padL, x2: W - padR, y1: y0, y2: y0, class: 'base' }, svg);
+  v.p.forEach((q, i) => {
+    const g = mk('g', {}, svg);
+    if (v.hide === i) {
+      mk('rect', { class: 'qz-unknown', x: cx(i) - bw / 2, y: padT + 4, width: bw, height: y0 - padT - 4, rx: 4 }, g);
+      mk('text', { class: 'qz-unknown-lbl', x: cx(i), y: (padT + y0) / 2 + 8, 'text-anchor': 'middle' }, g).textContent = '?';
+    } else {
+      const cls = (isHl(i) ? ' hl' : '') + (o.cls ? ' ' + o.cls(i) : '');
+      mk('rect', { class: 'bar' + cls, x: cx(i) - bw / 2, y: y(q), width: bw, height: Math.max(0, y0 - y(q)), rx: 4 }, g);
+      if (n <= 12) mk('text', { class: 'val', x: cx(i), y: y(q) - 6, 'text-anchor': 'middle' }, g).textContent = q.toFixed(dec);
+    }
+    if (i % every === 0) mk('text', { class: 'lbl', x: cx(i), y: H - (small ? 7 : 10), 'text-anchor': 'middle' }, g).textContent = v.xs[i];
+    if (o.pick) {
+      g.setAttribute('class', 'qz-pick'); g.setAttribute('tabindex', 0); g.setAttribute('role', 'button');
+      g.setAttribute('aria-label', `Outcome ${v.xs[i]}`);
+      mk('rect', { x: padL + slot * i, y: padT - 10, width: slot, height: H - padT + 10, fill: 'transparent' }, g);
+      g.addEventListener('click', () => o.pick(i));
+      g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); o.pick(i); } });
+    }
+  });
+  if (v.mean != null) {
+    const x = padL + slot * (v.mean - v.xs[0]) + slot / 2;
+    mk('line', { class: 'mean-line', x1: x, x2: x, y1: padT - 4, y2: y0 }, svg);
+    mk('path', { class: 'fulcrum', d: `M${x},${y0 + 2} l-7,11 h14 z` }, svg);
+    mk('text', { class: 'mean-lbl', x: x + 6, y: padT - 8 }, svg).textContent = 'μ = ' + v.mean;
+  }
+}
+
+(() => {
+  const modal = document.getElementById('qz-modal'), body = document.getElementById('qz-body');
+  const prog = document.getElementById('qz-prog'), closeBtn = document.getElementById('qz-close');
+  const letters = 'ABCD';
+  let quiz, key, qi, results, opener;
+
+  function open(k, btn) {
+    key = k; quiz = QUIZZES[k]; opener = btn;
+    document.getElementById('qz-stage').textContent = quiz.stage;
+    document.body.classList.add('qz-open');
+    start();
+    closeBtn.focus();
+  }
+  function close() {
+    document.body.classList.remove('qz-open');
+    if (opener) opener.focus();
+  }
+  function start() { qi = 0; results = []; showQ(); }
+
+  function drawProg() {
+    prog.innerHTML = quiz.qs.map((_, i) =>
+      `<i class="${results[i] === true ? 'right' : results[i] === false ? 'wrong' : i === qi ? 'now' : ''}"></i>`).join('');
+  }
+
+  function showQ() {
+    const q = quiz.qs[qi];
+    drawProg();
+    body.innerHTML = `<div class="qz-num">Question ${qi + 1} of ${quiz.qs.length}</div>
+      <div class="qz-q">${q.q}</div>
+      ${q.vis ? `<div class="qz-vis"><svg></svg>${q.type === 'pick' ? '<div class="qz-vis-note">Tap a bar</div>' : ''}</div>` : ''}
+      <div class="qz-opts${q.type === 'charts' ? ' charts' : ''}"></div>
+      <div class="qz-fbwrap"></div>
+      <div class="qz-foot"><span class="note">${results.filter(Boolean).length} correct so far</span><span class="qz-next"></span></div>`;
+    const svg = body.querySelector('.qz-vis svg'), opts = body.querySelector('.qz-opts');
+    if (q.type === 'pick') qzChart(svg, q.vis, { pick: i => answer(i) });
+    else if (q.vis) qzChart(svg, q.vis);
+    if (q.opts) q.opts.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.className = 'qz-opt';
+      if (q.type === 'charts') {
+        b.innerHTML = `<span class="qz-opt-key">${letters[i]}</span><svg></svg>`;
+        b.setAttribute('aria-label', `Chart ${letters[i]}: ${o.p.join(', ')}`);
+        qzChart(b.querySelector('svg'), o, { small: true });
+      } else b.innerHTML = `<span class="qz-opt-key">${letters[i]}</span><span>${o}</span>`;
+      b.onclick = () => answer(i);
+      opts.appendChild(b);
+    });
+    katexIn(body);
+    const first = body.querySelector('.qz-opt, .qz-pick');
+    if (first && document.body.classList.contains('qz-open') && qi) first.focus();
+  }
+
+  function answer(i) {
+    const q = quiz.qs[qi];
+    if (results[qi] != null) return;
+    const ok = i === q.ans;
+    results[qi] = ok;
+    const opts = body.querySelector('.qz-opts'), svg = body.querySelector('.qz-vis svg');
+    opts.classList.add('locked');
+    [...opts.children].forEach((b, j) => { b.classList.toggle('right', j === q.ans); b.classList.toggle('wrong', j === i && !ok); });
+    if (q.type === 'pick') qzChart(svg, q.vis, { cls: j => j === q.ans ? 'qz-right' : j === i ? 'qz-wrong' : 'dim' });
+    else if (q.after) qzChart(svg, q.after);
+    const correct = q.type === 'pick' ? `outcome ${q.vis.xs[q.ans]}` : q.type === 'charts' ? `chart ${letters[q.ans]}` : q.opts[q.ans];
+    const fb = document.createElement('div');
+    fb.className = 'qz-fb ' + (ok ? 'right' : 'wrong');
+    fb.innerHTML = (ok ? '<b>Correct!</b>' : `<b>Not quite. The answer is ${correct}.</b>`) + q.why;
+    body.querySelector('.qz-fbwrap').appendChild(fb);
+    katexIn(fb);
+    drawProg();
+    body.querySelector('.qz-foot .note').textContent = `${results.filter(Boolean).length} correct so far`;
+    const last = qi === quiz.qs.length - 1, next = document.createElement('button');
+    next.className = 'primary';
+    next.textContent = last ? 'See your score →' : 'Next question →';
+    next.onclick = () => { if (last) showEnd(); else { qi++; showQ(); } };
+    body.querySelector('.qz-next').appendChild(next);
+    next.focus();
+  }
+
+  function showEnd() {
+    const n = quiz.qs.length, s = results.filter(Boolean).length, R = 52, C = 2 * Math.PI * R;
+    qi = n; drawProg();
+    const msg = s === n ? `Perfect score. You've got ${quiz.stage} down.`
+      : s >= n - 1 ? 'Nearly there. Check the one you missed below.'
+      : 'Worth another look. Scroll back up, play with the charts, then try again.';
+    body.innerHTML = `<div class="qz-end">
+      <svg viewBox="0 0 140 140" width="150" height="150" role="img" aria-label="${s} out of ${n} correct">
+        <circle class="qz-ring-bg" cx="70" cy="70" r="${R}"/>
+        <circle class="qz-ring" cx="70" cy="70" r="${R}" transform="rotate(-90 70 70)" stroke-dasharray="${C}" stroke-dashoffset="${C}"/>
+        <text class="qz-ring-txt" x="70" y="76" text-anchor="middle">${s}/${n}</text>
+        <text class="qz-ring-sub" x="70" y="96" text-anchor="middle">correct</text>
+      </svg>
+      <div class="qz-q" style="margin-top:4px">${msg}</div>
+      <div class="qz-review">${quiz.qs.map((q, i) =>
+        `<div><span class="${results[i] ? 'ok' : 'no'}">${results[i] ? '✓' : '✗'}</span>${i + 1} · ${q.short}</div>`).join('')}</div>
+      <div class="btns" style="justify-content:center"><button class="primary" id="qz-again">Try again</button><button id="qz-done">Back to the page</button></div>
+    </div>`;
+    requestAnimationFrame(() => requestAnimationFrame(() =>
+      body.querySelector('.qz-ring').setAttribute('stroke-dashoffset', C * (1 - s / n))));
+    document.getElementById('qz-again').onclick = () => { start(); body.querySelector('.qz-opt, .qz-pick')?.focus(); };
+    document.getElementById('qz-done').onclick = close;
+    document.getElementById('qz-again').focus();
+  }
+
+  document.querySelectorAll('[data-quiz]').forEach(b => b.onclick = () => open(b.dataset.quiz, b));
+  closeBtn.onclick = close;
+  document.getElementById('qz-scrim').onclick = close;
+  document.addEventListener('keydown', e => {
+    if (!document.body.classList.contains('qz-open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') { // keep focus inside the quiz
+      const f = modal.querySelectorAll('button, [tabindex="0"]'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+})();
+
+// ---------- nav highlight ----------
+(() => {
+  const links = [...document.querySelectorAll('nav a')];
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-40% 0px -55% 0px' });
+  document.querySelectorAll('section').forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>

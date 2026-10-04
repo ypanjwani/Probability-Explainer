@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probability, Visually</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #fbfaf8;
+    --ink: #1d1b18;
+    --muted: #6b655c;
+    --line: #e7e1d7;
+    --rule: #eef2f7;
+    --accent: #d9480f;
+    --accent-soft: #fde8dc;
+    --bar: #2f5d8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background-color: var(--bg); color: var(--ink);
+    font: 16px/1.5 Inter, system-ui, sans-serif; min-height: 100vh; overflow-x: hidden;
+    /* faint notebook ruling, a nod to the paper sketch */
+    background-image: repeating-linear-gradient(to bottom, transparent 0 35px, var(--rule) 35px 36px);
+  }
+
+  header { text-align: center; padding: 28px 16px 0; }
+  .eyebrow { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+
+  /* ---------- stage ---------- */
+  .stage { position: relative; width: min(1100px, 100%); height: 770px; margin: 0 auto; }
+  .threads { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .threads path {
+    fill: none; stroke: #d8d0c3; stroke-width: 1.5; stroke-dasharray: 4 6;
+    stroke-dashoffset: 400; opacity: 0; transition: opacity .6s ease .9s;
+  }
+  .ready .threads path { opacity: 1; animation: flow 18s linear infinite; }
+  .threads path.on { stroke: var(--accent); stroke-width: 2; }
+  @keyframes flow { to { stroke-dashoffset: 0; } }
+
+  /* center circle */
+  .hub {
+    position: absolute; left: 50%; top: 48.6%; width: 230px; height: 230px;
+    transform: translate(-50%, -50%) scale(.4); opacity: 0;
+    transition: transform .7s cubic-bezier(.2, 1.4, .4, 1), opacity .4s;
+    display: grid; place-items: center; text-align: center; z-index: 2;
+  }
+  .ready .hub { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  .hub-disc {
+    position: absolute; inset: 0; border-radius: 50%; background: #fff;
+    border: 1.5px solid var(--ink); box-shadow: 0 10px 0 -4px var(--accent-soft), 0 18px 40px -18px rgba(29,27,24,.25);
+  }
+  .orbit { position: absolute; inset: -22px; animation: spin 40s linear infinite; }
+  .orbit circle.ring { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 2 7; stroke-linecap: round; }
+  .orbit circle.m1 { fill: var(--accent); }
+  .orbit circle.m2 { fill: var(--bar); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hub-in { position: relative; padding: 0 20px; }
+  .die {
+    width: 40px; height: 40px; margin: 0 auto 10px; border-radius: 9px; background: var(--accent);
+    display: grid; grid-template-columns: repeat(3, 1fr); padding: 7px; gap: 2px;
+    animation: tumble 6s ease-in-out infinite; cursor: pointer;
+  }
+  .die i { width: 6px; height: 6px; border-radius: 50%; background: #fff; place-self: center; opacity: 0; transition: opacity .15s; }
+  .die i.on { opacity: 1; }
+  @keyframes tumble { 0%, 80%, 100% { transform: rotate(0); } 86% { transform: rotate(-14deg); } 92% { transform: rotate(10deg); } }
+  .hub h1 { font: 600 1.85rem/1.05 Fraunces, Georgia, serif; margin: 0; letter-spacing: -.01em; }
+  .hub p { font: italic 400 .95rem/1.3 Fraunces, Georgia, serif; color: var(--muted); margin: 6px 0 0; }
+
+  /* cards */
+  .card {
+    position: absolute; left: 50%; top: 48.6%; width: var(--w); z-index: 3;
+    transform: translate(-50%, -50%) rotate(0deg) scale(.3); opacity: 0;
+    transition: left .8s cubic-bezier(.2, 1.25, .35, 1), top .8s cubic-bezier(.2, 1.25, .35, 1),
+                transform .8s cubic-bezier(.2, 1.25, .35, 1), opacity .4s;
+    transition-delay: var(--d);
+    cursor: pointer; outline: none; text-decoration: none; color: inherit;
+  }
+  .ready .card { left: var(--x); top: var(--y); transform: translate(-50%, -50%) rotate(var(--r)) scale(1); opacity: 1; }
+  .ready .card.settled { transition-delay: 0s; transition-duration: .35s; }
+  .ready .card:hover, .ready .card:focus-visible { transform: translate(-50%, -50%) rotate(0deg) scale(1.05); z-index: 5; }
+
+  .card-in {
+    position: relative; background: #fff; border: 1.5px solid var(--ink); border-radius: 14px;
+    padding: 16px 18px 15px; box-shadow: 5px 6px 0 var(--sh, #e9e4dc);
+    animation: bob var(--bob, 6s) ease-in-out infinite; animation-delay: calc(var(--d) * -3);
+    transition: box-shadow .2s, background .2s;
+  }
+  .card:hover .card-in, .card:focus-visible .card-in { box-shadow: 8px 10px 0 var(--sh, #e9e4dc); }
+  @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+
+  .card .ico { display: block; width: 64px; height: 34px; margin-bottom: 10px; }
+  .card h2 { font: 600 1.12rem/1.2 Fraunces, Georgia, serif; margin: 0; }
+  .card p { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .card.sm h2 { font-size: 1rem; }
+  .card.sm .ico { width: 52px; height: 28px; margin-bottom: 8px; }
+  .card.lg h2 { font-size: 1.35rem; }
+
+  .tag {
+    position: absolute; top: -11px; right: 14px; font: 500 10.5px/1 "JetBrains Mono", monospace;
+    letter-spacing: .08em; text-transform: uppercase; padding: 5px 8px; border-radius: 999px;
+    background: #fff; border: 1.5px solid var(--line); color: var(--muted);
+  }
+  .card.live { --sh: var(--accent-soft); }
+  .card.live .card-in { border-color: var(--accent); }
+  .card.live .tag { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .card.live .tag::before {
+    content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #fff;
+    margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .card.soon .card-in { border-color: #3a3631; }
+  .card.soon { display: none; }   /* coming-soon cards are hidden for now; remove this line to show them again */
+  .card-no {
+    position: absolute; top: -13px; left: 14px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: #fff; border: 1.5px solid var(--ink); font: 600 12px "JetBrains Mono", monospace; color: var(--ink);
+  }
+  .card .go { font: 600 13px Inter, sans-serif; color: var(--accent); margin-top: 10px; display: inline-flex; gap: 6px; align-items: center; }
+  .card .go span { transition: transform .2s; }
+  .card:hover .go span { transform: translateX(4px); }
+
+  .card.nope .card-in { animation: nope .45s ease; }
+  @keyframes nope { 20% { translate: -6px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 3px 0; } }
+
+  /* svg icon strokes */
+  .ico .b { fill: var(--bar); }
+  .ico .a { fill: var(--accent); }
+  .ico .s { fill: none; stroke: var(--bar); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .ico .sa { fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; }
+  .ico .dash { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 3 3; }
+
+  /* leaving transition */
+  .leaving .card:not(.picked), .leaving .hub, .leaving .threads, .leaving header, .leaving .foot {
+    opacity: 0 !important; transition: opacity .35s !important;
+  }
+  .leaving .card.picked { transform: translate(-50%, -50%) rotate(0) scale(1.15) !important; transition: transform .45s cubic-bezier(.3, 1.3, .5, 1) !important; }
+
+  .foot { text-align: center; color: var(--muted); font-size: 14px; padding: 0 16px 36px; }
+  .foot b { color: var(--ink); font-weight: 600; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 20px); opacity: 0;
+    background: var(--ink); color: #fff; font-size: 14px; padding: 10px 16px; border-radius: 999px;
+    transition: all .25s; pointer-events: none; z-index: 20; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---------- small screens: circle on top, cards flow below ---------- */
+  @media (max-width: 860px) {
+    .stage { height: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 26px 18px; padding: 24px 16px 40px; }
+    .threads { display: none; }
+    .hub, .ready .hub { position: relative; left: auto; top: auto; width: 200px; height: 200px; transform: scale(1); flex: 0 0 100%; max-width: 200px; margin: 10px calc(50% - 100px) 18px; }
+    .hub h1 { font-size: 1.6rem; }
+    .card, .ready .card { position: relative; left: auto; top: auto; width: calc(50% - 9px); transform: rotate(var(--r)); }
+    .ready .card:hover { transform: rotate(0) scale(1.03); }
+    .card { opacity: 0; transform: translateY(30px) rotate(var(--r)); }
+  }
+  @media (max-width: 480px) {
+    .card, .ready .card { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01s !important; transition-delay: 0s !important; }
+  }
+</style>
+</head>
+<body>
+<header><div class="eyebrow">An interactive series</div></header>
+
+<div class="stage" id="stage">
+  <svg class="threads" id="threads" aria-hidden="true"></svg>
+
+  <div class="hub">
+    <div class="hub-disc"></div>
+    <svg class="orbit" viewBox="0 0 274 274" aria-hidden="true">
+      <circle class="ring" cx="137" cy="137" r="135"></circle>
+      <circle class="m1" cx="137" cy="2" r="5"></circle>
+      <circle class="m2" cx="272" cy="137" r="4"></circle>
+      <circle class="m1" cx="41" cy="232" r="3.5"></circle>
+    </svg>
+    <div class="hub-in">
+      <div class="die" id="die" title="Roll me"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <h1>Probability,<br>visually</h1>
+      <p>pick a topic to begin</p>
+    </div>
+  </div>
+
+  <!-- cards: --x/--y are final positions, --r tilt, --d entrance delay. Live cards are numbered in reading order, clockwise from top-left -->
+  <a class="card live" href="basics.html" style="--x:14%;--y:23%;--r:-6deg;--w:260px;--d:0.15s;--bob:7.4s" data-i="0">
+    <div class="card-in">
+      <span class="card-no" aria-label="Step 1">1</span>
+      <span class="tag">Live</span>
+      <svg class="ico" viewBox="0 0 64 34"><rect class="s" x="3" y="5" width="24" height="24" rx="5"/><circle class="a" cx="10" cy="12" r="2.2"/><circle class="a" cx="15" cy="17" r="2.2"/><circle class="a" cx="20" cy="22" r="2.2"/><path class="dash" d="M31,17 H43"/><path class="sa" d="M40,13 L44,17 L40,21"/><text x="50" y="23" style="font:600 16px 'JetBrains Mono',monospace;fill:var(--bar)">3</text></svg>
+      <h2>Probability Basics</h2>
+      <p>Outcomes, events &amp; random variables</p>
+      <div class="go">Open explainer <span>→</span></div>
+    </div>
+  </a>
+
+  <a class="card live" href="types.html" style="--x:50%;--y:14.5%;--r:2deg;--w:260px;--d:0.23s;--bob:6.8s" data-i="1">
+    <div class="card-in">
+      <span class="card-no" aria-label="Step 2">2</span>
+      <span class="tag">Live</span>
+      <svg class="ico" viewBox="0 0 64 34"><circle class="s" cx="24" cy="17" r="14"/><circle class="s" cx="40" cy="17" r="14"/><path class="a" d="M32,5.5 A14,14 0 0 1 32,28.5 A14,14 0 0 1 32,5.5 Z"/></svg>
+      <h2>Types of Probability</h2>
+      <p>Joint, marginal &amp; conditional</p>
+      <div class="go">Open explainer <span>→</span></div>
+    </div>
+  </a>
+
+  <a class="card live" href="ev.html" style="--x:86%;--y:23%;--r:5deg;--w:260px;--d:0.31s;--bob:6.1s" data-i="2">
+    <div class="card-in">
+      <span class="card-no" aria-label="Step 3">3</span>
+      <span class="tag">Live</span>
+      <svg class="ico" viewBox="0 0 64 34"><path class="s" d="M4,20 L60,14"/><rect class="b" x="8" y="9" width="8" height="10" rx="1.5" transform="rotate(-6 12 14)"/><rect class="b" x="44" y="3" width="10" height="12" rx="1.5" transform="rotate(-6 49 9)"/><path class="a" d="M34,18 L28,31 H40 Z"/></svg>
+      <h2>Expected Value &amp; Variance</h2>
+      <p>The balance point and the spread</p>
+      <div class="go">Open explainer <span>→</span></div>
+    </div>
+  </a>
+
+  <a class="card live" href="discrete.html" style="--x:74%;--y:81%;--r:3deg;--w:260px;--d:0.39s;--bob:6.4s" data-i="3">
+    <div class="card-in">
+      <span class="card-no" aria-label="Step 4">4</span>
+      <span class="tag">Live</span>
+      <svg class="ico" viewBox="0 0 64 34"><rect class="b" x="2" y="22" width="8" height="12" rx="1.5"/><rect class="b" x="13" y="12" width="8" height="22" rx="1.5"/><rect class="a" x="24" y="3" width="8" height="31" rx="1.5"/><rect class="b" x="35" y="10" width="8" height="24" rx="1.5"/><rect class="b" x="46" y="20" width="8" height="14" rx="1.5"/><rect class="b" x="57" y="28" width="7" height="6" rx="1.5"/></svg>
+      <h2>Discrete Probability Distributions</h2>
+      <p>Uniform, Bernoulli, Binomial, Negative Binomial &amp; Poisson</p>
+      <div class="go">Open explainer <span>→</span></div>
+    </div>
+  </a>
+
+  <a class="card live" href="continuous.html" style="--x:26%;--y:81%;--r:-4deg;--w:260px;--d:0.47s;--bob:7.1s" data-i="4">
+    <div class="card-in">
+      <span class="card-no" aria-label="Step 5">5</span>
+      <span class="tag">Live</span>
+      <svg class="ico" viewBox="0 0 64 34"><path class="s" d="M2,32 C16,32 20,3 32,3 C44,3 48,32 62,32"/><path class="dash" d="M32,4 V33"/></svg>
+      <h2>Continuous Probability Distributions</h2>
+      <p>Uniform, Exponential, Normal &amp; Gamma</p>
+      <div class="go">Open explainer <span>→</span></div>
+    </div>
+  </a>
+
+  <!-- coming-soon cards: hidden (.card.soon {display:none}) but kept for later -->
+  <a class="card soon" href="#" data-href="bayes.html" style="--x:36.5%;--y:15%;--r:-6deg;--w:240px;--d:.31s;--bob:5.6s" data-i="5">
+    <div class="card-in">
+      <span class="tag">Soon</span>
+      <svg class="ico" viewBox="0 0 64 34"><path class="dash" d="M2,31 C14,31 18,12 26,12 C34,12 38,31 50,31"/><path class="s" d="M14,31 C26,31 30,3 38,3 C46,3 50,31 62,31"/></svg>
+      <h2>Bayes' Theorem</h2>
+      <p>Updating beliefs with new evidence</p>
+    </div>
+  </a>
+
+  <a class="card sm soon" href="#" data-href="lln.html" style="--x:60%;--y:19%;--r:5deg;--w:185px;--d:.63s;--bob:5.2s" data-i="6">
+    <div class="card-in">
+      <span class="tag">Soon</span>
+      <svg class="ico" viewBox="0 0 64 34"><path class="dash" d="M2,17 H62"/><path class="s" d="M2,4 L7,30 L12,8 L17,26 L23,11 L29,22 L36,14 L44,20 L53,16 L62,17"/></svg>
+      <h2>Law of Large Numbers</h2>
+      <p>Why averages settle down</p>
+    </div>
+  </a>
+
+  <a class="card sm soon" href="#" data-href="clt.html" style="--x:29%;--y:51%;--r:-5deg;--w:185px;--d:.71s;--bob:6.6s" data-i="7">
+    <div class="card-in">
+      <span class="tag">Soon</span>
+      <svg class="ico" viewBox="0 0 64 34"><rect class="b" x="4" y="28" width="6" height="6" rx="1"/><rect class="b" x="12" y="20" width="6" height="14" rx="1"/><rect class="b" x="20" y="9" width="6" height="25" rx="1"/><rect class="b" x="28" y="3" width="6" height="31" rx="1"/><rect class="b" x="36" y="9" width="6" height="25" rx="1"/><rect class="b" x="44" y="20" width="6" height="14" rx="1"/><rect class="b" x="52" y="28" width="6" height="6" rx="1"/><path class="sa" d="M2,33 C18,33 22,2 31,2 C40,2 44,33 60,33"/></svg>
+      <h2>Central Limit Theorem</h2>
+      <p>Why bell curves are everywhere</p>
+    </div>
+  </a>
+</div>
+
+<div class="foot"><b>5 topics live</b> · more on the way</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const cards = [...document.querySelectorAll('.card:not(.soon)')];
+  const threads = document.getElementById('threads');
+  const toast = document.getElementById('toast');
+  const NS = 'http://www.w3.org/2000/svg';
+  let toastT;
+
+  // entrance: circle pops first, then the cards fly out of it
+  requestAnimationFrame(() => setTimeout(() => document.body.classList.add('ready'), 120));
+  setTimeout(() => cards.forEach(c => c.classList.add('settled')), 1900);
+
+  // dashed threads from the circle to each card
+  function drawThreads() {
+    threads.innerHTML = '';
+    const W = stage.clientWidth, H = stage.clientHeight;
+    threads.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const cx = W / 2, cy = H * 0.486;
+    cards.forEach((c, i) => {
+      const x = parseFloat(c.style.getPropertyValue('--x')) / 100 * W;
+      const y = parseFloat(c.style.getPropertyValue('--y')) / 100 * H;
+      const mx = (cx + x) / 2 + (i % 2 ? 30 : -30), my = (cy + y) / 2;
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', `M${cx},${cy} Q${mx},${my} ${x},${y}`);
+      p.dataset.i = i;
+      threads.appendChild(p);
+    });
+  }
+  drawThreads();
+  addEventListener('resize', drawThreads);
+
+  cards.forEach((c, i) => {
+    const thread = () => threads.querySelector(`[data-i="${i}"]`);
+    c.addEventListener('mouseenter', () => thread()?.classList.add('on'));
+    c.addEventListener('mouseleave', () => thread()?.classList.remove('on'));
+    c.addEventListener('click', e => {
+      e.preventDefault();
+      if (c.classList.contains('live')) {
+        c.classList.add('picked');
+        document.body.classList.add('leaving');
+        setTimeout(() => { location.href = c.getAttribute('href'); }, 480);
+      } else {
+        c.classList.remove('nope'); void c.offsetWidth; c.classList.add('nope');
+        toast.textContent = `"${c.querySelector('h2').textContent}" is coming soon`;
+        toast.classList.add('show');
+        clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+      }
+    });
+  });
+
+  // coming back via the browser's back button: undo the exit state
+  addEventListener('pageshow', () => {
+    document.body.classList.remove('leaving');
+    cards.forEach(c => c.classList.remove('picked'));
+  });
+
+  // the die in the hub rolls when clicked
+  const faces = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  const pips = [...document.querySelectorAll('#die i')];
+  const show = n => pips.forEach((p, i) => p.classList.toggle('on', faces[n].includes(i)));
+  show(5);
+  document.getElementById('die').addEventListener('click', () => {
+    let k = 0;
+    const t = setInterval(() => { show(1 + Math.floor(Math.random() * 6)); if (++k > 7) clearInterval(t); }, 70);
+  });
+})();
+</script>
+</body>
+</html>

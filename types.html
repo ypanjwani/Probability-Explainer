@@ -1,0 +1,2077 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Types of Probability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}]})"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #fbfaf8;
+    --ink: #1d1b18;
+    --muted: #6b655c;
+    --line: #e7e1d7;
+    --accent: #d9480f;
+    --accent-soft: #fde8dc;
+    --bar: #2f5d8a;
+    --bar-soft: #e3ecf5;
+    --bar-hover: #d9480f;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.7 Inter, system-ui, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 16px 96px; }
+
+  /* Sticky stage nav */
+  nav {
+    position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.88);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
+  }
+  nav .in { max-width: 760px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  nav .in::-webkit-scrollbar { display: none; }
+  nav a {
+    font: 500 13px Inter, sans-serif; color: var(--muted); text-decoration: none;
+    padding: 6px 12px; border-radius: 999px; white-space: nowrap;
+  }
+  nav a:hover { color: var(--ink); background: var(--surface); }
+  nav a.back { color: var(--ink); font-weight: 600; border-right: 1px solid var(--line); border-radius: 0; margin-right: 4px; }
+  nav a.on { color: var(--accent); background: var(--accent-soft); }
+
+  .eyebrow {
+    font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  h1 {
+    font: 600 clamp(2.2rem, 6vw, 3.4rem)/1.1 Fraunces, Georgia, serif;
+    margin: 14px 0 18px; letter-spacing: -.02em;
+  }
+  section { padding-top: 40px; }
+  section + section { border-top: 1px solid var(--line); margin-top: 56px; }
+  h2 { font: 600 1.9rem/1.2 Fraunces, Georgia, serif; margin: 10px 0 14px; }
+  h3 { font: 600 1.25rem/1.3 Fraunces, Georgia, serif; margin: 40px 0 10px; }
+  .tagline { font: italic 400 1.2rem/1.4 Fraunces, Georgia, serif; color: var(--muted); margin: -6px 0 18px; }
+  .lede { font-size: 1.15rem; color: var(--muted); margin: 0; }
+  p { margin: 0 0 16px; }
+  em.key { font-style: normal; background: var(--accent-soft); padding: 1px 6px; border-radius: 4px; }
+  code { font-family: "JetBrains Mono", monospace; font-size: .88em; }
+
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 24px 0; }
+  .rule { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .rule b { display: block; font-size: 14px; margin-bottom: 4px; }
+  .rule > span { font-size: 14px; color: var(--muted); line-height: 1.5; display: block; }
+  .rule code { font-size: 13px; color: var(--accent); }
+
+  .example {
+    border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; margin: 20px 0;
+    color: var(--muted); font-size: 15px;
+  }
+  .example b { color: var(--ink); }
+
+  /* Interactive card */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin: 24px 0; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .card-title { font-weight: 600; }
+  .hint { font-size: 14px; color: var(--muted); }
+  .sub { font: 500 12px "JetBrains Mono", monospace; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 18px 0 0; }
+
+  svg.chart { width: 100%; height: auto; display: block; margin-top: 10px; touch-action: none; user-select: none; }
+  .bar { fill: var(--bar); transition: fill .15s; }
+  .bar.hl { fill: var(--accent); }
+  .bar.dim { fill: var(--bar-soft); }
+  .drag .hit { cursor: ns-resize; }
+  .bar-g:hover .bar, .bar-g.active .bar { fill: var(--bar-hover); }
+  .handle { fill: #fff; stroke: var(--bar); stroke-width: 2; pointer-events: none; }
+  .bar-g:hover .handle, .bar-g.active .handle { stroke: var(--bar-hover); }
+  .lbl { font: 500 12px "JetBrains Mono", monospace; fill: var(--muted); }
+  .val { font: 500 11px "JetBrains Mono", monospace; fill: var(--ink); }
+  .grid { stroke: var(--line); }
+  .base { stroke: #cfc7ba; }
+  .hit { fill: transparent; }
+  .sd-band { fill: var(--accent); opacity: .07; }
+  .mean-line { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .fulcrum { fill: var(--ink); }
+  .mean-lbl { font: 600 12px "JetBrains Mono", monospace; fill: var(--ink); }
+  .emp { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+  .step { stroke: var(--bar); stroke-width: 2.5; fill: none; }
+  .jump { stroke: var(--bar); stroke-width: 1; stroke-dasharray: 3 3; opacity: .5; }
+  .dot { fill: var(--bar); }
+  .odot { fill: #fff; stroke: var(--bar); stroke-width: 2; }
+  .step.hl, .dot.hl { stroke: var(--accent); fill: var(--accent); }
+  .step.hl { fill: none; }
+
+  /* Controls */
+  .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 24px; margin: 6px 0 4px; }
+  .ctl label { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+  .ctl label b { font: 600 14px "JetBrains Mono", monospace; color: var(--ink); }
+  input[type=range] { width: 100%; accent-color: var(--accent); margin: 6px 0 0; }
+
+  .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font: 500 13px "JetBrains Mono", monospace; padding: 5px 11px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line); color: var(--ink);
+  }
+  .chip.acc { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  button {
+    font: 500 14px Inter, sans-serif; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 14px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); color: var(--accent); }
+  .nin { display: inline-flex; }
+  .nin input {
+    width: 96px; font: 500 14px "JetBrains Mono", monospace; color: var(--ink); background: #fff;
+    border: 1px solid var(--line); border-right: 0; border-radius: 8px 0 0 8px; padding: 8px 10px;
+  }
+  .nin input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  .nin button { border-radius: 0 8px 8px 0; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { filter: brightness(1.08); color: #fff; }
+
+  .legend { display: flex; gap: 18px; font-size: 13px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+  .legend i { display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .lg-bar { width: 12px; height: 12px; background: var(--bar); border-radius: 2px; }
+  .lg-emp { width: 16px; height: 3px; background: var(--accent); border-radius: 2px; }
+  .lg-mean { width: 16px; border-top: 2px dashed var(--ink); }
+  .lg-ovl { width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2.5px solid var(--accent); }
+  .ovl { fill: #fff; stroke: var(--accent); stroke-width: 2.5; }
+
+  /* Poisson timeline */
+  .tl-line { stroke: var(--line); stroke-width: 2; }
+  .tl-tick { stroke: #cfc7ba; }
+  .tl-ev { fill: var(--accent); }
+  .tl-ev.new { animation: pop .35s ease-out; transform-box: fill-box; transform-origin: center; }
+  @keyframes pop { from { transform: scale(2.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* Family map */
+  .fm-node rect { fill: #fff; stroke: var(--line); stroke-width: 1.5; transition: all .15s; }
+  .fm-node text { font: 600 14px Inter, sans-serif; fill: var(--ink); pointer-events: none; }
+  .fm-node .s { font: 500 11px "JetBrains Mono", monospace; fill: var(--muted); }
+  .fm-node { cursor: pointer; }
+  .fm-node:hover rect { stroke: var(--accent); }
+  .fm-node.on rect { stroke: var(--accent); fill: var(--accent-soft); stroke-width: 2; }
+  .fm-node.ext rect { stroke-dasharray: 5 4; fill: var(--surface); }
+  .fm-edge { stroke: #c9c1b4; stroke-width: 1.6; fill: none; transition: stroke .15s; }
+  .fm-edge.on { stroke: var(--accent); stroke-width: 2.4; }
+  .fm-elbl { font: 500 11.5px "JetBrains Mono", monospace; fill: var(--muted); }
+  .fm-elbl.on { fill: var(--accent); }
+  .fm-elbg { fill: var(--surface); }
+  #fm-arrow path { fill: #c9c1b4; }
+  #fm-arrow-on path { fill: var(--accent); }
+  .fm-info { min-height: 92px; border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; font-size: 15px; }
+  .fm-info h4 { margin: 0 0 4px; font: 600 1.1rem Fraunces, Georgia, serif; }
+  .fm-info a { color: var(--accent); font-weight: 500; text-decoration: none; }
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; min-width: 640px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--surface); }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  td.ex { color: var(--muted); }
+
+  /* Formula box */
+  .formula {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; margin: 20px 0;
+  }
+  .formula > div { padding: 14px 18px; }
+  .formula > div + div { border-left: 1px solid var(--line); background: var(--surface); font-size: 15px; }
+  .formula .t { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .formula .katex-display { margin: .5em 0; }
+  @media (max-width: 600px) {
+    .formula { grid-template-columns: 1fr; }
+    .formula > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  }
+
+  /* Coin */
+  .coin-row { display: flex; align-items: center; gap: 20px; margin: 14px 0 4px; }
+  .coin {
+    width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; flex: none;
+    font: 600 24px "JetBrains Mono", monospace; color: #fff; background: var(--muted);
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,.15);
+  }
+  .coin.s { background: var(--accent); }
+  .coin.f { background: var(--bar); }
+  .coin.spin { animation: spin .5s ease-out; }
+  @keyframes spin { from { transform: rotateY(0) scale(1.1); } to { transform: rotateY(1080deg) scale(1); } }
+
+  .trials { display: flex; flex-wrap: wrap; gap: 5px; min-height: 22px; margin: 14px 0 4px; }
+  .tr {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--line);
+    transition: background .15s, transform .15s;
+  }
+  .tr.s { background: var(--accent); transform: scale(1.1); }
+  .tr.f { background: var(--bar); }
+  .result { font-size: 15px; color: var(--muted); }
+  .result b { color: var(--ink); font-family: "JetBrains Mono", monospace; }
+
+  #tip {
+    position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: #fff;
+    font: 500 12px/1.5 "JetBrains Mono", monospace; padding: 8px 10px; border-radius: 8px;
+    opacity: 0; transition: opacity .1s; max-width: 320px;
+  }
+  .note { font-size: 14px; color: var(--muted); }
+
+  /* Binomial: live shape caption + formula key */
+  .shape-note { font-size: 14px; color: var(--muted); margin-top: 10px; padding: 8px 12px; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+  .shape-note b { color: var(--ink); }
+  .term-key { border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 0 0 20px; }
+  .term-key-title { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 8px; }
+  .term-key-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; align-items: baseline; font-size: 15px; }
+  .term-key-grid > div:nth-child(odd) { text-align: right; white-space: nowrap; }
+  .term-key-grid > div:nth-child(even) { color: var(--muted); }
+
+  /* Worked-examples launcher + sidebar */
+  .ex-launch { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 32px 0 0; }
+  .ex-fab {
+    display: inline-flex; align-items: center; gap: 10px; border-radius: 999px; padding: 6px 18px 6px 6px;
+    font-weight: 600; box-shadow: 0 2px 10px rgba(29,27,24,.07);
+  }
+  .ex-fab-dot {
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent); color: #fff; font: 600 13px "JetBrains Mono", monospace;
+  }
+  .ex-scrim {
+    position: fixed; inset: 0; z-index: 30; background: rgba(29,27,24,.35);
+    opacity: 0; visibility: hidden; transition: opacity .25s, visibility .25s;
+  }
+  .ex-panel {
+    position: fixed; top: 0; right: 0; z-index: 31; height: 100%; width: min(440px, 100vw);
+    display: flex; flex-direction: column; background: #fff; border-left: 1px solid var(--line);
+    box-shadow: -12px 0 32px rgba(29,27,24,.1);
+    transform: translateX(100%); visibility: hidden; transition: transform .3s ease, visibility .3s;
+  }
+  body.ex-open { overflow: hidden; }
+  body.ex-open .ex-scrim { opacity: 1; visibility: visible; transition: opacity .25s, visibility 0s; }
+  .ex-panel.on { transform: none; visibility: visible; transition: transform .3s ease, visibility 0s; }
+  .ex-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 20px 20px 14px; border-bottom: 1px solid var(--line); }
+  .ex-head h3 { margin: 6px 0 0; }
+  .ex-close { width: 36px; height: 36px; border-radius: 50%; padding: 0; flex: none; }
+  .ex-body { overflow-y: auto; padding: 0 20px 32px; }
+  .ex-item { padding: 22px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 1.6; }
+  .ex-item:last-child { border-bottom: 0; }
+  .ex-item p { margin: 0 0 10px; }
+  .ex-item h4 { font: 600 1.15rem/1.3 Fraunces, Georgia, serif; margin: 4px 0 8px; }
+  .ex-tag { font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+  .ex-q { font-weight: 600; }
+  .ex-steps { padding-left: 20px; margin: 0 0 10px; color: var(--muted); }
+  .ex-steps li { margin: 4px 0; }
+  .ex-ans { background: var(--accent-soft); color: var(--accent); border-radius: 8px; padding: 8px 12px; font: 600 14px "JetBrains Mono", monospace; margin: 0 0 12px; }
+  @media (prefers-reduced-motion: reduce) { .ex-panel, .ex-scrim { transition: none; } }
+  /* ===== Bayes page ===== */
+  .bz-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .bz-seg button { border: 0; border-radius: 0; padding: 7px 12px; }
+  .bz-seg button + button { border-left: 1px solid var(--line); }
+  .bz-seg button.on { background: var(--accent-soft); color: var(--accent); }
+  .bz-row { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; margin: 10px 0 4px; font-size: 14px; color: var(--muted); }
+  .pp { transition: opacity .2s; }
+  .pp.dim { opacity: .12; }
+  .pp-m { fill: var(--accent); }
+  .pp-h { fill: #c9d6e3; }
+  .pp-spot { fill: var(--ink); opacity: .75; }
+  .cell-tp { fill: var(--accent); }
+  .cell-fn { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1; }
+  .cell-fp { fill: var(--bar); }
+  .cell-tn { fill: #e3ddd2; }
+  .lg-tp { width: 12px; height: 12px; background: var(--accent); border-radius: 2px; }
+  .lg-fn { width: 12px; height: 12px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 2px; }
+  .lg-fp { width: 12px; height: 12px; background: var(--bar); border-radius: 2px; }
+  .lg-tn { width: 12px; height: 12px; background: #e3ddd2; border-radius: 2px; }
+  .lg-blue { width: 16px; height: 3px; background: var(--bar); border-radius: 2px; }
+  .lg-acc { width: 16px; height: 3px; background: var(--accent); border-radius: 2px; }
+  .lg-soft { width: 12px; height: 12px; background: var(--accent); opacity: .18; border-radius: 2px; }
+  .lg-dash { width: 16px; border-top: 2px dashed var(--muted); }
+  .tree-edge { stroke: #c9c1b4; stroke-width: 1.6; fill: none; }
+  .tree-edge.pos { stroke: var(--accent); stroke-width: 2.2; }
+  .tree-box { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
+  .tree-box.pos { stroke: var(--accent); fill: var(--accent-soft); }
+  .tree-txt { font: 600 13px Inter, sans-serif; fill: var(--ink); }
+  .tree-sub { font: 500 11px "JetBrains Mono", monospace; fill: var(--muted); }
+  .curve-acc { fill: none; stroke: var(--accent); stroke-width: 2.6; }
+  .curve-blue { fill: none; stroke: var(--bar); stroke-width: 2; }
+  .diag { stroke: var(--muted); stroke-width: 1.4; stroke-dasharray: 5 4; }
+  .mark-dot { fill: var(--accent); stroke: #fff; stroke-width: 2; }
+  .mark-dot.b { fill: var(--bar); }
+  .guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+  .post-area { fill: var(--accent); opacity: .12; }
+  .post-ci { fill: var(--accent); opacity: .22; }
+  .prior-line { fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .true-p { stroke: var(--bar); stroke-width: 2; stroke-dasharray: 4 3; }
+  .true-lbl { font: 600 12px "JetBrains Mono", monospace; fill: var(--bar); }
+  .bar-lbl { font: 600 12px "JetBrains Mono", monospace; fill: var(--ink); }
+  .bz-words { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 6px; }
+  .bz-word { font: 500 14px "JetBrains Mono", monospace; border-radius: 999px; padding: 6px 12px; }
+  .bz-word small { color: var(--muted); font-size: 11.5px; margin-left: 6px; }
+  .bz-word.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .bz-meter { height: 14px; border-radius: 999px; background: var(--bar-soft); overflow: hidden; margin: 12px 0 6px; }
+  .bz-meter > i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
+  .lln-steps { grid-template-columns: 1fr; }
+  .lln-steps .katex-display, .formula .katex-display { margin: .6em 0; overflow-x: auto; overflow-y: hidden; }
+  /* ===== Types page ===== */
+  .tw-c { cursor: pointer; transition: opacity .15s; }
+  .tw-c rect.bg { fill: #fff; stroke: var(--line); stroke-width: 1.5; transition: fill .15s, stroke .15s; }
+  .tw-c.tot rect.bg { fill: var(--surface); }
+  .tw-c:hover rect.bg { stroke: var(--accent); }
+  .tw-c.hl rect.bg { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.2; }
+  .tw-c.pick rect.bg { fill: var(--bar-soft); stroke: var(--bar); stroke-width: 2.2; }
+  .tw-c.dim { opacity: .3; }
+  .tw-heat { fill: var(--bar); pointer-events: none; }
+  .tw-main { font: 600 20px "JetBrains Mono", monospace; fill: var(--ink); pointer-events: none; }
+  .tw-sub { font: 500 11.5px "JetBrains Mono", monospace; fill: var(--muted); pointer-events: none; }
+  .tw-head { font: 600 14px Inter, sans-serif; fill: var(--ink); }
+  .tw-head.click { cursor: pointer; }
+  .tw-head.click:hover { fill: var(--accent); }
+  .tw-head.muted { fill: var(--muted); font-weight: 500; }
+  .vn-r { cursor: pointer; transition: fill-opacity .15s; }
+  .vn-a { fill: var(--accent); fill-opacity: .12; }
+  .vn-b { fill: var(--bar); fill-opacity: .12; }
+  .vn-ab { fill: #7a4a6a; fill-opacity: .22; }
+  .vn-n { fill: #fff; stroke: var(--line); stroke-width: 1.5; }
+  .vn-r.hl { fill: var(--accent); fill-opacity: .5; }
+  .vn-n.hl { fill: var(--accent); fill-opacity: .18; }
+  .vn-r.dim { fill-opacity: .03; }
+  .vn-ring { fill: none; stroke-width: 2; pointer-events: none; }
+  .vn-ring.a { stroke: var(--accent); }
+  .vn-ring.b { stroke: var(--bar); }
+  .vn-lbl { font: 600 15px "JetBrains Mono", monospace; fill: var(--ink); pointer-events: none; }
+  .vn-sub { font: 500 11px "JetBrains Mono", monospace; fill: var(--muted); pointer-events: none; }
+  .vn-title { font: 600 14px Inter, sans-serif; }
+  .vn-title.a { fill: var(--accent); }
+  .vn-title.b { fill: var(--bar); }
+  .vn-badge { font: 700 12px "JetBrains Mono", monospace; fill: var(--accent); pointer-events: none; }
+  .ms-top { fill: var(--accent); }
+  .ms-bot { fill: var(--bar); }
+  .ms-faint { opacity: .35; }
+  .ms-txt { font: 600 13px "JetBrains Mono", monospace; fill: #fff; pointer-events: none; }
+  .ms-line { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 6 4; }
+  .ms-lbl { font: 600 12px "JetBrains Mono", monospace; fill: var(--ink); }
+  .ms-lblbg { fill: #fff; opacity: .9; }
+  .tp-col { fill: var(--bar-soft); opacity: .55; }
+  .tp-fill { fill: var(--accent); fill-opacity: .8; }
+  .bz-seg button:disabled { opacity: .35; cursor: not-allowed; }
+  .bz-seg button:disabled:hover { color: var(--ink); }
+  .ex-body { position: relative; }
+  .ty-def { background: var(--accent-soft); border-radius: 12px; padding: 14px 18px; margin: 20px 0; font-size: 16px; }
+  .ty-def > b:first-child { display: block; font: 500 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 4px; }
+  .sc-pt { fill: var(--bar); opacity: .3; }
+  .sc-pt.hl { fill: var(--accent); opacity: .9; }
+  .sc-band { fill: var(--accent); opacity: .08; }
+  .sc-frame { fill: none; stroke: var(--line); }
+  .j1c-box { fill: var(--accent); fill-opacity: .1; stroke: var(--accent); stroke-width: 2; }
+  #j1c-chart { cursor: crosshair; }
+</style>
+</head>
+<body>
+<nav><div class="in">
+  <a href="index.html" class="back">← All topics</a>
+  <a href="#marginal">0 · Marginal</a>
+  <a href="#joint">1 · Joint</a>
+  <a href="#conditional">2 · Conditional</a>
+  <a href="#independence">3 · Independence</a>
+  <a href="#total">4 · Total probability</a>
+  <a href="#together">5 · Together</a>
+</div></nav>
+
+<main>
+  <div class="eyebrow">An interactive explainer</div>
+  <h1>Types of Probability</h1>
+  <p class="lede">Marginal, joint and conditional probability, read off a single table. Then the rules that connect them.</p>
+
+  <!-- ============ STAGE 0 ============ -->
+  <section id="marginal">
+    <div class="eyebrow">Stage 0</div>
+    <h2>Marginal Probability</h2>
+    <p class="tagline">One question at a time, ignoring the other</p>
+    <p>All through this page we'll use one small survey. <b>200 people</b> were asked two questions: <i>coffee or tea?</i> and <i>morning person or night person?</i> Every person lands in exactly one of four boxes, so the answers fit in a <b>two-way table</b>.</p>
+    <p>Quick notation: an <b>event</b> is something that can happen, written with a capital letter, such as \(A\) = "drinks coffee". \(P(A)\) is its probability: the share of people for whom it's true. \(A \cap B\) means "A <b>and</b> B", and \(A^c\) means "<b>not</b> A".</p>
+    <p>The simplest question asks about <b>one</b> variable and ignores the other: "what share drink coffee?" That's a <b>marginal probability</b>.</p>
+
+    <div class="ty-def"><b>Definition</b>The <b>marginal probability</b> of an event is the probability that it happens, taken on its own, whatever the other variables turn out to be. For a random variable \(X\) the full list of these, \(P(X = x)\) for every value \(x\), is its <b>marginal distribution</b>.</div>
+
+    <div class="example"><b>Example:</b> 80 coffee drinkers are morning people and 40 are night people. So 120 of the 200 drink coffee, and \(P(\text{Coffee}) = 120/200 = 0.60\). Whether they like mornings doesn't matter: both kinds get added in.</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" id="m0-title">200 people: drink × body clock</div>
+        <div class="hint">Click a total or a heading</div>
+      </div>
+      <svg class="chart" id="m0-tbl" role="img" aria-label="Two-way table of counts with row and column totals"></svg>
+      <div class="sub">Each variable on its own (its marginal distribution)</div>
+      <svg class="chart" id="m0-strip" role="img" aria-label="Two bars, each split into the shares of one variable"></svg>
+      <div class="result" id="m0-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip acc" id="m0-p"></span><span class="chip" id="m0-q"></span></div>
+        <div class="btns"><button id="m0-reset">Back to the survey</button></div>
+      </div>
+    </div>
+
+    <h3>Reading the table</h3>
+    <div class="rules">
+      <div class="rule"><b>The orange cells add up to the blue total</b><span>A marginal is a sum along a row or down a column. You add up every possible value of the variable you're ignoring.</span></div>
+      <div class="rule"><b>Each pair of margins adds to 1</b><span>Everyone drinks coffee or tea, so \(P(\text{Coffee}) + P(\text{Tea}) = 1\). The same goes for Morning + Night. Each bar below the table is split into two pieces that fill it exactly.</span></div>
+      <div class="rule"><b>Margins hide the link</b><span>The margins say 60% drink coffee and 55% are morning people. They can't tell you whether those are mostly the <i>same</i> people. For that you need the inside of the table (Stage 1).</span></div>
+    </div>
+
+    <h3>Why is it called "marginal"?</h3>
+    <p>Before computers, a <b>contingency table</b> (a table that cross-counts two variables, like this one) was filled in by hand. The row and column totals were written in the <em class="key">margins</em> of the page, to the right and along the bottom, and the probabilities you get from them kept the name. The word has nothing to do with "small" or "unimportant".</p>
+    <p>The name stuck in pictures too. When a scatter plot of two variables has a histogram of each one drawn along its top and side edges (the continuous card below), those edge plots are called <b>marginal plots</b>.</p>
+
+    <h3>Unconditional: no "given" anywhere</h3>
+    <p>\(P(\text{Coffee})\) has no bar \(\mid\) in it. It's the chance <i>before</i> you learn anything about the other variable, so it's also called the <b>unconditional</b> probability. Compare it with the conditionals from Stage 2, where you're told the body clock first:</p>
+    <div class="rules">
+      <div class="rule"><b>Told "morning person"</b><span>\(P(\text{Coffee} \mid \text{Morning}) = 80/110 \approx 0.73\)</span></div>
+      <div class="rule"><b>Told "night person"</b><span>\(P(\text{Coffee} \mid \text{Night}) = 40/90 \approx 0.44\)</span></div>
+      <div class="rule"><b>Told nothing (marginal)</b><span>\(P(\text{Coffee}) = 0.60\). It sits between the two, as their average weighted by group size: \(0.73 \times 0.55 + 0.44 \times 0.45 = 0.60\). Stage 4 turns this into a rule.</span></div>
+    </div>
+    <div class="example"><b>Careful: unconditional ≠ independent.</b> A marginal doesn't depend on the other variable's <i>value</i>, because it adds up over all of them. That doesn't mean the two variables are unrelated. Here coffee and mornings clearly go together (0.73 vs 0.44). The marginal just <i>ignores</i> that link; it doesn't remove it. Checking whether two variables really are independent takes the joint table (Stage 3).</div>
+
+    <h3>Why adding works</h3>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Step 1 · Split the event</b><span>Every coffee drinker is either a morning person or a night person, never both and never neither. So "Coffee" breaks into two pieces that don't overlap: \(\text{Coffee} \cap \text{Morning}\) and \(\text{Coffee} \cap \text{Night}\).</span></div>
+      <div class="rule"><b>Step 2 · Non-overlapping pieces add</b><span>When pieces don't overlap, their probabilities just add up.
+        $$P(\text{Coffee}) = P(\text{Coffee} \cap \text{Morning}) + P(\text{Coffee} \cap \text{Night})$$</span></div>
+      <div class="rule"><b>Step 3 · Check</b><span>\(\frac{80}{200} + \frac{40}{200} = 0.40 + 0.20 = 0.60\). That matches the row total, 120/200.</span></div>
+      <div class="rule"><b>Step 4 · The name for this</b><span>Adding over every value of a variable you don't care about is called <b>marginalising</b> it out (or "summing it out"). With more variables you sum out all of them: \(P(x) = \sum_y \sum_z P(x, y, z)\).</span></div>
+    </div>
+
+    <h3>Continuous variables: integrate instead of add</h3>
+    <p>Height and weight don't come in a few boxes; they can take any value. Their joint distribution is a <b>joint density</b> \(f_{X,Y}(x, y)\), a cloud rather than a table. The idea is the same: to get the marginal of \(X\), collect everything in a thin column at \(x\), over every possible \(y\). With infinitely many values of \(y\), "add them all" becomes an <b>integral</b>.</p>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">500 adults: height × weight</div>
+        <div class="hint">Hover a column; drag the link</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>How strongly height and weight go together (correlation) <b id="m0c-r-v"></b></label><input type="range" id="m0c-r" min="-0.9" max="0.9" step="0.1" value="0.6"></div>
+      </div>
+      <svg class="chart" id="m0c-chart" role="img" aria-label="Scatter plot of height and weight with marginal histograms along the top and right edges"></svg>
+      <div class="legend"><span><i class="lg-bar"></i>marginal histogram</span><span><i class="lg-dash"></i>marginal density</span><span><i class="lg-ovl"></i>one column of the cloud</span></div>
+      <div class="result" id="m0c-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="m0c-chip"></span></div>
+        <div class="btns"><button id="m0c-new">New sample</button></div>
+      </div>
+    </div>
+    <div class="rules">
+      <div class="rule"><b>Top histogram = add up each column</b><span>Hover over the cloud. Every point in the highlighted column, whatever its weight, lands in one bar of the top histogram. That's \(\int f_{X,Y}(x, y)\,dy\) done with dots.</span></div>
+      <div class="rule"><b>The link changes, the margins don't</b><span>Drag the correlation from −0.9 to 0.9. The cloud tilts and squeezes, but both edge curves stay the same bell shape. Very different joints can share the same marginals.</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">Discrete (sum)</div>
+        $$P(X = x) = \sum_{y} P(X = x,\, Y = y)$$
+        <div class="t">Continuous (integrate)</div>
+        $$f_X(x) = \int_{-\infty}^{\infty} f_{X,Y}(x, y)\, dy$$
+      </div>
+      <div>
+        <div class="t">Always</div>
+        $$\sum_{x} P(X = x) = 1 \qquad \int f_X(x)\, dx = 1$$
+        <div class="t">From a table of counts</div>
+        $$P(X = x) = \frac{\text{row (or column) total}}{N}$$
+      </div>
+    </div>
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(P(X = x)\)</div><div>the marginal probability that \(X\) takes the value \(x\) (e.g. drink = Coffee), whatever \(Y\) is</div>
+        <div>\(P(X = x,\, Y = y)\)</div><div>the joint probability: one cell of the table (Stage 1)</div>
+        <div>\(\sum_y\)</div><div>add over every value \(y\) of the other variable (here Morning and Night)</div>
+        <div>\(f_{X,Y}(x, y)\)</div><div>the joint density: how thick the cloud is at the point \((x, y)\)</div>
+        <div>\(\int \dots dy\)</div><div>the continuous "add over every \(y\)": collect a whole column of the cloud</div>
+        <div>\(f_X(x)\)</div><div>the marginal density of \(X\): the curve along the top edge</div>
+        <div>\(N\)</div><div>the grand total: everyone in the table (200)</div>
+      </div>
+    </div>
+
+    <h3>Marginal probability in machine learning</h3>
+    <div class="rules" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div class="rule"><b>Class balance and baselines</b><span>The marginal distribution of the label, \(P(y)\), is the first thing to check. If 99% of transactions are not fraud, a model that always says "not fraud" scores 99% accuracy. That's why imbalanced data needs other metrics, reweighting or stratified splits.</span></div>
+      <div class="rule"><b>Priors in naive Bayes</b><span>A naive Bayes classifier starts from \(P(\text{class})\), the marginal share of each class in the training data. The normaliser \(P(x) = \sum_y P(x \mid y)\,P(y)\) is the marginal of the features.</span></div>
+      <div class="rule"><b>Latent-variable models</b><span>Gaussian mixtures, topic models and VAEs have hidden variables \(z\). They're trained to make the data likely, which means the marginal \(p(x) = \int p(x \mid z)\,p(z)\,dz\): the hidden part is integrated out.</span></div>
+      <div class="rule"><b>Bayesian model comparison</b><span>The <i>marginal likelihood</i> (or evidence), \(p(D) = \int p(D \mid \theta)\,p(\theta)\,d\theta\), averages how well a model fits over all its parameter settings. Comparing it between models is how Bayesian methods pick one.</span></div>
+      <div class="rule"><b>Data drift monitoring</b><span>Production systems compare each feature's marginal distribution in live data against training, using a histogram per feature and tests like PSI or Kolmogorov–Smirnov. The catch, from the card above: marginals can stay the same while the relationship between features changes.</span></div>
+      <div class="rule"><b>Probabilistic graphical models</b><span>In a Bayesian network, "how likely is this disease, given the symptoms?" is answered by summing out every other node. Algorithms like belief propagation exist to do that marginalisation efficiently.</span></div>
+    </div>
+
+    <h3>Common mistakes</h3>
+    <div class="rules">
+      <div class="rule"><b>Dividing by the wrong total</b><span>A marginal divides by the grand total \(N\). Dividing a cell by a row total gives a conditional instead.</span></div>
+      <div class="rule"><b>Reading a link from the margins</b><span>"60% drink coffee and 55% are morning people" says nothing about how many do both. That number is anywhere from 30 to 110 people.</span></div>
+      <div class="rule"><b>Unconditional = independent</b><span>A marginal ignores the other variable; it doesn't show the variables are unrelated.</span></div>
+      <div class="rule"><b>Summing pieces that overlap</b><span>The sum works because the pieces (Morning, Night) don't overlap and cover everyone. Overlapping pieces would be counted twice.</span></div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="tx0-panel" aria-haspopup="dialog" aria-controls="tx0-panel"><span class="ex-fab-dot" aria-hidden="true">0</span>Worked examples</button>
+      <span class="note">Spam emails, a shop, fraud labels, a column of heights</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 1 ============ -->
+  <section id="joint">
+    <div class="eyebrow">Stage 1</div>
+    <h2>Joint Probability</h2>
+    <p class="tagline">Two things true at the same time</p>
+    <p>Marginals answer one question at a time. A <b>joint probability</b> asks about both at once: "what share drink coffee <i>and</i> are morning people?"</p>
+
+    <div class="ty-def"><b>Definition</b>The <b>joint probability</b> of two events is the probability that they both happen together, written \(P(A \cap B)\). For two random variables, \(P(X = x,\, Y = y)\) is the chance that \(X\) takes the value \(x\) <i>and</i> \(Y\) takes the value \(y\) at the same time. The full list of these for every pair \((x, y)\) is the <b>joint distribution</b>.</div>
+
+    <p>In a two-way table, a joint probability is a <b>single cell divided by everyone</b>. In a Venn diagram it's the <em class="key">overlap</em> of the two circles. You'll see it written several ways, all meaning the same thing: \(P(A \cap B)\), \(P(A, B)\), \(P(AB)\), or "\(P(A \text{ and } B)\)".</p>
+
+    <div class="example"><b>Example:</b> 80 of the 200 are coffee-drinking morning people, so \(P(\text{Coffee} \cap \text{Morning}) = 80/200 = 0.40\). The other three cells: coffee and night 0.20, tea and morning 0.15, tea and night 0.25. Together: 1.00.</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title" id="j1-title">The joint table and its Venn diagram</div>
+        <div class="hint">Click a cell or a region</div>
+      </div>
+      <div class="bz-row">Show:
+        <span class="bz-seg" id="j1-mode"><button data-v="count" class="on">counts</button><button data-v="prob">probabilities</button></span>
+      </div>
+      <svg class="chart" id="j1-tbl" role="img" aria-label="Two-way table, cells shaded by size"></svg>
+      <svg class="chart" id="j1-venn" role="img" aria-label="Venn diagram of the two events"></svg>
+      <div class="result" id="j1-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip acc" id="j1-p"></span><span class="chip" id="j1-sum"></span></div>
+        <div class="btns"><button id="j1-reset">Back to the survey</button></div>
+      </div>
+    </div>
+
+    <h3>Reading the table</h3>
+    <div class="rules">
+      <div class="rule"><b>Darker cell = more likely pair</b><span>The shading is the joint distribution. Coffee + morning is the most common combination, and tea + morning the rarest.</span></div>
+      <div class="rule"><b>Cells ↔ regions</b><span>Each cell is one region of the Venn diagram: the overlap, "coffee only", "morning only", and the outside (neither).</span></div>
+      <div class="rule"><b>Every cell ≥ 0, all cells add to 1</b><span>That's all it takes to be a valid joint distribution for two discrete variables, also called a <b>joint PMF</b>. The table <i>is</i> the joint PMF.</span></div>
+      <div class="rule"><b>Order doesn't matter</b><span>"Coffee and morning" is the same group as "morning and coffee": \(P(A \cap B) = P(B \cap A)\). This symmetry is what Bayes' theorem is built on.</span></div>
+    </div>
+
+    <h3>How big can the overlap be?</h3>
+    <p>If you only know the marginals, 60% coffee and 55% morning, the joint isn't fixed. But it can't be just anything:</p>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Upper bound · the overlap fits inside both circles</b><span>Coffee-and-morning people are a subset of coffee people <i>and</i> of morning people. So \(P(A \cap B) \le \min\{0.60,\, 0.55\} = 0.55\): at most 110 people.</span></div>
+      <div class="rule"><b>Lower bound · the circles must overlap if they're big enough</b><span>60% + 55% = 115%, more than everyone. At least 15% of people have to be in both: \(P(A \cap B) \ge 0.60 + 0.55 - 1 = 0.15\), or 30 people. If the two marginals add to less than 1, the lower bound is just 0.</span></div>
+      <div class="rule"><b>Where the real answer comes from</b><span>Anything from 0.15 to 0.55 is possible. To pin it down you need either the table itself, or how the two variables are related. That's the next section.</span></div>
+    </div>
+
+    <h3>Independent or dependent: two ways to build a joint</h3>
+    <p>When you don't have the full table, the joint is built from smaller pieces. There's one rule that always works, and a shortcut that only works when the variables are <b>independent</b> (knowing one tells you nothing about the other, Stage 3).</p>
+    <div class="rules">
+      <div class="rule"><b>Always true (dependent or not)</b><span>Take the chance of A, then the chance of B <i>once A has happened</i>: \(P(A \cap B) = P(A)\,P(B \mid A)\). This is the multiplication rule from Stage 2.</span></div>
+      <div class="rule"><b>Only if independent</b><span>If A doesn't change the chance of B, then \(P(B \mid A) = P(B)\), and the rule shrinks to \(P(A \cap B) = P(A)\,P(B)\): just multiply the marginals.</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">The real survey vs an independent one</div>
+        <div class="hint">Same margins, different insides</div>
+      </div>
+      <div class="bz-row">Table:
+        <span class="bz-seg" id="j1i-mode"><button data-v="real" class="on">real survey (dependent)</button><button data-v="ind">if independent</button></span>
+      </div>
+      <svg class="chart" id="j1i-tbl" role="img" aria-label="Joint table of the real survey or the independent version"></svg>
+      <div class="result" id="j1i-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip acc" id="j1i-p"></span><span class="chip" id="j1i-q"></span></div>
+      </div>
+    </div>
+    <div class="rules">
+      <div class="rule"><b>The margins are identical</b><span>Both tables have 120 coffee, 80 tea, 110 morning, 90 night. Only the insides differ, which is why the margins alone can't tell you the joint.</span></div>
+      <div class="rule"><b>Multiplying marginals is a claim</b><span>Writing \(0.60 \times 0.55 = 0.33\) quietly assumes independence. In the real survey it's wrong: the true joint is 0.40, because coffee drinkers lean towards mornings.</span></div>
+      <div class="rule"><b>The gap measures the link</b><span>Real 80 vs independent 66: 14 more coffee-morning people than chance would give. Stage 3 lets you drag this gap around.</span></div>
+    </div>
+
+    <h3>Continuous variables: probability is volume</h3>
+    <p>For continuous variables like height and weight, the joint distribution is a <b>joint density</b> \(f_{X,Y}(x, y)\): a hill over the \((x, y)\) plane, highest where the points are thickest. A probability is now the <b>volume</b> under the hill over a region, \(\iint_R f_{X,Y}(x, y)\,dx\,dy\). In the cloud below, that volume is simply the share of points inside the box.</p>
+    <p>Two consequences: the chance of hitting one <i>exact</i> pair, say exactly 170.000… cm and 70.000… kg, is 0 (a single point has no volume), so you always ask about a <b>region</b>. And if \(X\) and \(Y\) are independent, the hill is a product: \(f_{X,Y}(x, y) = f_X(x)\,f_Y(y)\).</p>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">500 adults: drag a box over the cloud</div>
+        <div class="hint">Drag on the chart to draw a new box</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Correlation between height and weight <b id="j1c-r-v"></b></label><input type="range" id="j1c-r" min="-0.9" max="0.9" step="0.1" value="0.6"></div>
+      </div>
+      <svg class="chart" id="j1c-chart" role="img" aria-label="Scatter of height and weight with a box whose share of points is the joint probability"></svg>
+      <div class="result" id="j1c-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip acc" id="j1c-p"></span><span class="chip" id="j1c-q"></span></div>
+        <div class="btns"><button id="j1c-cdf">Make it a CDF box</button><button id="j1c-box">160–180 cm, 60–80 kg</button><button id="j1c-new">New sample</button></div>
+      </div>
+    </div>
+    <div class="rules">
+      <div class="rule"><b>Points inside ≈ volume</b><span>The share of the 500 points in the box estimates the joint probability. The exact volume under the density sits next to it, and the two agree to within sampling noise.</span></div>
+      <div class="rule"><b>Product only at correlation 0</b><span>The box 160–180 cm × 60–80 kg holds about 45% of people at correlation 0.6, but the marginals multiply to 41%. Slide to 0 and the two match: that's independence.</span></div>
+      <div class="rule"><b>The joint CDF is a corner box</b><span>"Make it a CDF box" stretches the box down and left forever. Its volume is the <b>joint CDF</b>, \(F(x, y) = P(X \le x,\, Y \le y)\).</span></div>
+    </div>
+
+    <h3>More than two events: the chain rule</h3>
+    <p>The multiplication rule keeps going. Each new event is multiplied in, conditioned on everything before it:</p>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Step 1 · First card</b><span>Draw three cards without putting any back. The first is a heart: \(P(H_1) = 13/52\).</span></div>
+      <div class="rule"><b>Step 2 · Second card, given the first</b><span>12 hearts are left among 51 cards: \(P(H_2 \mid H_1) = 12/51\).</span></div>
+      <div class="rule"><b>Step 3 · Third card, given both</b><span>\(P(H_3 \mid H_1, H_2) = 11/50\). Multiply all three:
+        $$P(H_1 \cap H_2 \cap H_3) = \frac{13}{52} \cdot \frac{12}{51} \cdot \frac{11}{50} \approx 0.0129$$</span></div>
+      <div class="rule"><b>Check</b><span>If the draws were independent (each card put back), it would be \((1/4)^3 \approx 0.0156\). Not putting cards back makes later hearts rarer.</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">Discrete (joint PMF)</div>
+        $$p(x, y) = P(X = x,\, Y = y), \quad \sum_x \sum_y p(x, y) = 1$$
+        <div class="t">Continuous (joint PDF)</div>
+        $$P\big((X, Y) \in R\big) = \iint_R f_{X,Y}(x, y)\, dx\, dy$$
+        <div class="t">Joint CDF</div>
+        $$F(x, y) = P(X \le x,\, Y \le y)$$
+      </div>
+      <div>
+        <div class="t">Always</div>
+        $$P(A \cap B) = P(A)\,P(B \mid A)$$
+        <div class="t">Only if independent</div>
+        $$P(A \cap B) = P(A)\,P(B)$$
+        $$f_{X,Y}(x, y) = f_X(x)\,f_Y(y)$$
+        <div class="t">Bounds</div>
+        $$\max\{0,\, P(A) + P(B) - 1\} \le P(A \cap B) \le \min\{P(A),\, P(B)\}$$
+      </div>
+    </div>
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(\cap\) or a comma</div><div>"and": both happen (the overlap in the Venn diagram)</div>
+        <div>\(p(x, y)\)</div><div>the joint PMF: one cell of the table</div>
+        <div>\(f_{X,Y}(x, y)\)</div><div>the joint density: how high the hill is at \((x, y)\); not a probability by itself</div>
+        <div>\(\iint_R \dots\, dx\, dy\)</div><div>the volume under the hill over the region \(R\): the share of points in the box</div>
+        <div>\(F(x, y)\)</div><div>the joint CDF: probability of being at or below \(x\) <i>and</i> at or below \(y\)</div>
+        <div>\(P(B \mid A)\)</div><div>the chance of B once A is known (Stage 2); equals \(P(B)\) only if independent</div>
+        <div>\(\max\{\cdot\},\ \min\{\cdot\}\)</div><div>the smallest and largest overlap the marginals allow</div>
+      </div>
+    </div>
+
+    <h3>Joint probability in machine learning</h3>
+    <div class="rules" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+      <div class="rule"><b>The confusion matrix</b><span>Rows = true class, columns = predicted class. Divide every cell by the total and you have the joint distribution of (truth, prediction). Precision and recall are conditionals read from it.</span></div>
+      <div class="rule"><b>Generative vs discriminative models</b><span>A generative model (naive Bayes, Gaussian discriminant analysis) learns the whole joint \(p(x, y)\) and can create new examples. A discriminative model (logistic regression, most neural classifiers) learns only \(p(y \mid x)\).</span></div>
+      <div class="rule"><b>Language models use the chain rule</b><span>The probability of a sentence is a joint over its words, built word by word: \(p(w_1, \dots, w_n) = \prod_i p(w_i \mid w_1, \dots, w_{i-1})\). GPT-style models learn each factor.</span></div>
+      <div class="rule"><b>Market-basket analysis</b><span>In association rules, the <i>support</i> of {bread, butter} is the joint probability that a basket contains both. Rules like "bread → butter" are then ranked by conditionals.</span></div>
+      <div class="rule"><b>Co-occurrence and embeddings</b><span>Word embeddings like GloVe start from how often two words appear together: a joint probability table over pairs of words.</span></div>
+      <div class="rule"><b>Feature interactions</b><span>Two features can each look useless on their own (flat marginals) yet predict perfectly together, like XOR. Only the joint shows it.</span></div>
+    </div>
+
+    <h3>Common mistakes</h3>
+    <div class="rules">
+      <div class="rule"><b>Multiplying dependent events</b><span>\(P(A)\,P(B)\) is only right for independent events. For the survey it gives 0.33 instead of 0.40.</span></div>
+      <div class="rule"><b>Joint vs conditional</b><span>A joint divides a cell by everyone (80/200). Dividing by a row total (80/120) gives a conditional instead.</span></div>
+      <div class="rule"><b>"And" vs "or"</b><span>"Coffee and morning" is the overlap (0.40). "Coffee or morning" is everything in either circle, a bigger group (0.75).</span></div>
+      <div class="rule"><b>Point probabilities for continuous variables</b><span>\(f_{X,Y}(170, 70)\) is a height on the hill, not a probability; for tightly packed data it can even be bigger than 1. Only volumes over regions are probabilities.</span></div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="tx1-panel" aria-haspopup="dialog" aria-controls="tx1-panel"><span class="ex-fab-dot" aria-hidden="true">1</span>Worked examples</button>
+      <span class="note">Rain and a late bus, gym bounds, a confusion matrix, tall and heavy</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 2 ============ -->
+  <section id="conditional">
+    <div class="eyebrow">Stage 2</div>
+    <h2>Conditional Probability</h2>
+    <p class="tagline">Zoom in on a row, then count again</p>
+    <p>A <b>conditional probability</b> answers a question after you've been told something: "<i>given</i> this person drinks coffee, how likely are they a morning person?" Written \(P(\text{Morning} \mid \text{Coffee})\). The bar \(\mid\) is read "given".</p>
+    <p>"Given coffee" means <em class="key">ignore everyone else</em>. The coffee row becomes the whole world, and its total, not 200, goes on the bottom of the fraction.</p>
+
+    <div class="example"><b>Example:</b> of the 120 coffee drinkers, 80 are morning people: \(P(\text{Morning} \mid \text{Coffee}) = 80/120 \approx 0.67\). Among tea drinkers it's only \(30/80 = 0.375\). Compare the joint, \(P(\text{Coffee} \cap \text{Morning}) = 80/200 = 0.40\): same top, different bottom.</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Zoom into the table</div>
+        <div class="hint">Pick what you're given, then what you ask</div>
+      </div>
+      <div class="bz-row">Given:
+        <span class="bz-seg" id="c2-given"><button data-v="none">nothing</button><button data-v="r0" class="on"></button><button data-v="r1"></button><button data-v="k0"></button><button data-v="k1"></button></span>
+      </div>
+      <div class="bz-row">Ask:
+        <span class="bz-seg" id="c2-ask"><button data-v="r0"></button><button data-v="r1"></button><button data-v="k0" class="on"></button><button data-v="k1"></button></span>
+      </div>
+      <svg class="chart" id="c2-tbl" role="img" aria-label="Two-way table, zoomed into the given row or column"></svg>
+      <div class="result" id="c2-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip acc" id="c2-p"></span><span class="chip" id="c2-flip"></span></div>
+        <div class="btns"><button id="c2-reset">Back to the survey</button></div>
+      </div>
+      <div class="sub">The same table as a tree: multiply along the branches</div>
+      <div class="bz-row">Split first by:
+        <span class="bz-seg" id="c2-first"><button data-v="r" class="on"></button><button data-v="k"></button></span>
+      </div>
+      <svg class="chart" id="c2-tree" role="img" aria-label="Probability tree: first split, then second split, with joint probabilities at the leaves"></svg>
+    </div>
+
+    <h3>Reading the table</h3>
+    <div class="rules">
+      <div class="rule"><b>"Given" changes the bottom</b><span>Everything outside the given row or column fades. Its total (blue) is the new denominator, and the percentages inside it now add to 100%.</span></div>
+      <div class="rule"><b>Order matters</b><span>\(P(\text{Morning} \mid \text{Coffee}) = 80/120 = 0.67\), but \(P(\text{Coffee} \mid \text{Morning}) = 80/110 = 0.73\). Same 80 people on top, different crowds underneath.</span></div>
+      <div class="rule"><b>The tree multiplies</b><span>Each first branch is a marginal and each second branch is a conditional. Multiplying along a path gives the joint at its leaf: \(0.60 \times 0.67 = 0.40\).</span></div>
+    </div>
+
+    <h3>Where the formula comes from</h3>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Step 1 · Zoom in on B</b><span>Keep only the B row, the 120 coffee drinkers. They are the new "everyone".</span></div>
+      <div class="rule"><b>Step 2 · Count A inside B</b><span>Among them, 80 are also morning people. Those 80 are the cell \(A \cap B\).</span></div>
+      <div class="rule"><b>Step 3 · Counts → probabilities</b><span>Divide the top and bottom by \(N = 200\). The answer doesn't change, but now both pieces are probabilities you already know:
+        $$\frac{80}{120} = \frac{80/200}{120/200} = \frac{P(A \cap B)}{P(B)}$$</span></div>
+      <div class="rule"><b>Step 4 · Check</b><span>\(0.40 / 0.60 \approx 0.667\), the same as \(80/120\). Turned around, \(P(A \cap B) = P(A \mid B)\,P(B)\): the multiplication rule the tree uses.</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">Conditional probability</div>
+        $$P(A \mid B) = \frac{P(A \cap B)}{P(B)}$$
+        <div class="t">Multiplication rule</div>
+        $$P(A \cap B) = P(A \mid B)\,P(B) = P(B \mid A)\,P(A)$$
+      </div>
+      <div>
+        <div class="t">Inside one given world</div>
+        $$\sum_{a} P(A = a \mid B) = 1$$
+        <p class="note" style="margin:0">Needs \(P(B) > 0\): you can't zoom into an empty row.</p>
+      </div>
+    </div>
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(\mid\)</div><div>"given": what's on its right is known to be true</div>
+        <div>\(P(A \cap B)\)</div><div>the joint: the cell you're counting (Stage 1)</div>
+        <div>\(P(B)\)</div><div>the marginal of what you're given: the size of the world you zoomed into (Stage 0)</div>
+        <div>\(P(A \mid B)\)</div><div>the share of B that is also A</div>
+      </div>
+    </div>
+    <div class="example"><b>The trap:</b> swapping \(P(A \mid B)\) for \(P(B \mid A)\) is called the <i>confusion of the inverse</i>. "Most coffee drinkers are morning people" is not the same claim as "most morning people drink coffee". When the two groups have very different sizes, the gap can be huge. The Bayes' Theorem page (coming soon) is about getting from one to the other.</div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="tx2-panel" aria-haspopup="dialog" aria-controls="tx2-panel"><span class="ex-fab-dot" aria-hidden="true">2</span>Worked examples</button>
+      <span class="note">Online classes, cart to purchase, the two-child puzzle, recall vs precision</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 3 ============ -->
+  <section id="independence">
+    <div class="eyebrow">Stage 3</div>
+    <h2>Independence</h2>
+    <p class="tagline">When knowing one tells you nothing about the other</p>
+    <p>Two events are <b>independent</b> if learning one doesn't change the chance of the other: \(P(\text{Morning} \mid \text{Coffee}) = P(\text{Morning})\). In the survey that's false: 67% of coffee drinkers are morning people, against 55% overall. Drink and body clock are <b>linked</b> (dependent).</p>
+    <p>There's an equivalent test that only uses the table: the joint equals the product of the marginals, \(P(A \cap B) = P(A)\,P(B)\). That's what lets you multiply probabilities of independent things, like two coin flips.</p>
+
+    <div class="example"><b>Example:</b> if drink and body clock were independent, the coffee-morning cell would be \(0.60 \times 0.55 = 0.33\), or 66 people. The survey has 80. More coffee drinkers are morning people than independence would predict.</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Drag the link, keep the margins</div>
+        <div class="hint">The totals never change, only the inside</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label id="i4-a-lbl">Coffee drinkers who are morning people <b id="i4-a-v"></b></label><input type="range" id="i4-a" min="30" max="110" step="1" value="80"></div>
+      </div>
+      <div class="sub">Contingency table: real value, and what independence predicts</div>
+      <div class="bz-row">Show:
+        <span class="bz-seg" id="i4-mode"><button data-v="count" class="on">counts</button><button data-v="prob">probabilities</button></span>
+      </div>
+      <svg class="chart" id="i4-tbl" role="img" aria-label="Two-way table of counts with the counts independence would predict"></svg>
+      <div class="sub">The same table as a split graph</div>
+      <svg class="chart" id="i4-mosaic" role="img" aria-label="Mosaic plot: column widths are one variable, heights within each column are the other"></svg>
+      <div class="legend"><span><i class="lg-tp"></i><span id="i4-lg0"></span></span><span><i class="lg-fp"></i><span id="i4-lg1"></span></span><span><i class="lg-mean"></i><span id="i4-lgm"></span></span></div>
+      <div class="result" id="i4-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip" id="i4-c0"></span><span class="chip" id="i4-c1"></span><span class="chip acc" id="i4-v"></span></div>
+        <div class="btns"><button class="primary" id="i4-ind">Make independent</button><button id="i4-reset">Back to the survey</button></div>
+      </div>
+    </div>
+
+    <h3>Reading the graph</h3>
+    <div class="rules">
+      <div class="rule"><b>Table: real vs predicted</b><span>Under each count is what independence predicts: row total × column total ÷ N (120 × 110 ÷ 200 = 66). Orange cells are off; when all four match, they turn plain.</span></div>
+      <div class="rule"><b>Widths = first variable</b><span>Each column's width is its marginal: coffee takes 60% of the width, tea 40%. Dragging doesn't change it.</span></div>
+      <div class="rule"><b>Heights = conditional</b><span>The orange part of each column is the share of that column who are morning people: \(P(\text{Morning} \mid \text{drink})\).</span></div>
+      <div class="rule"><b>Independent = the splits line up</b><span>When both orange tops sit on the dashed line (the overall 55%), knowing the drink tells you nothing. Press "Make independent" to see it.</span></div>
+    </div>
+
+    <h3>Why the product works</h3>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Step 1 · Start from the multiplication rule</b><span>From Stage 2, this always holds: \(P(A \cap B) = P(A \mid B)\,P(B)\).</span></div>
+      <div class="rule"><b>Step 2 · Use independence</b><span>Independent means \(P(A \mid B) = P(A)\). Swap it in: \(P(A \cap B) = P(A)\,P(B)\).</span></div>
+      <div class="rule"><b>Step 3 · Check</b><span>Set the slider to 66: \(P(\text{Coffee} \cap \text{Morning}) = 66/200 = 0.33\), and \(P(\text{Coffee})\,P(\text{Morning}) = 0.60 \times 0.55 = 0.33\). Both conditionals are then 0.55.</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">Independent events (any one implies the others)</div>
+        $$P(A \cap B) = P(A)\,P(B)$$
+        $$P(A \mid B) = P(A) \qquad P(B \mid A) = P(B)$$
+      </div>
+      <div>
+        <div class="t">Not the same as</div>
+        <p style="margin:8px 0 0"><b>Mutually exclusive</b> means \(P(A \cap B) = 0\). If both events can happen, that's as <i>dependent</i> as it gets: knowing A happened tells you B didn't.</p>
+      </div>
+    </div>
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(P(A)\,P(B)\)</div><div>the joint you'd expect if the two had nothing to do with each other</div>
+        <div>\(P(A \mid B) = P(A)\)</div><div>being told B leaves the chance of A unchanged</div>
+        <div>dependent</div><div>anything else: the joint is above (positive link) or below (negative link) the product</div>
+      </div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="tx3-panel" aria-haspopup="dialog" aria-controls="tx3-panel"><span class="ex-fab-dot" aria-hidden="true">3</span>Worked examples</button>
+      <span class="note">Two dice: an even first die and the sum</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 4 ============ -->
+  <section id="total">
+    <div class="eyebrow">Stage 4</div>
+    <h2>Law of Total Probability</h2>
+    <p class="tagline">Rebuild a marginal from its conditionals</p>
+    <p>Sometimes you don't have the whole table. You only know how each group behaves (conditionals) and how big each group is (marginals). The <b>law of total probability</b> puts them back together: split the world into groups, find the chance <i>inside</i> each group, and take an average weighted by group size.</p>
+    <p>It's the tree from Stage 2 read in the other direction: add up every leaf where the event happens.</p>
+
+    <div class="example"><b>Example:</b> a factory has three machines. A makes 50% of the parts (2% defective), B makes 30% (3% defective), C makes 20% (5% defective). Overall: \(0.50 \times 0.02 + 0.30 \times 0.03 + 0.20 \times 0.05 = 0.029\). That's <b>2.9%</b>, not the plain average of the three rates (3.3%).</div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Three machines, one defect rate</div>
+        <div class="hint">Widths = share of parts, heights = defect rate</div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Machine A's share of parts <b id="t5-sa-v"></b></label><input type="range" id="t5-sa" min="10" max="80" step="5" value="50"></div>
+        <div class="ctl"><label>Machine B's share of parts <b id="t5-sb-v"></b></label><input type="range" id="t5-sb" min="10" max="80" step="5" value="30"></div>
+        <div class="ctl"><label>A's defect rate <b id="t5-ra-v"></b></label><input type="range" id="t5-ra" min="0" max="10" step="0.5" value="2"></div>
+        <div class="ctl"><label>B's defect rate <b id="t5-rb-v"></b></label><input type="range" id="t5-rb" min="0" max="10" step="0.5" value="3"></div>
+        <div class="ctl"><label>C's defect rate <b id="t5-rc-v"></b></label><input type="range" id="t5-rc" min="0" max="10" step="0.5" value="5"></div>
+      </div>
+      <svg class="chart" id="t5-chart" role="img" aria-label="Three columns with widths equal to machine share and filled height equal to defect rate"></svg>
+      <div class="legend"><span><i class="lg-tp"></i>defective parts (area = share × rate)</span><span><i class="lg-mean"></i>overall defect rate</span></div>
+      <div class="result" id="t5-res" style="margin-top:10px"></div>
+      <div class="card-foot">
+        <div class="chips"><span class="chip acc" id="t5-p"></span><span class="chip" id="t5-flip"></span></div>
+      </div>
+    </div>
+
+    <h3>Reading the graph</h3>
+    <div class="rules">
+      <div class="rule"><b>Area = joint</b><span>Each orange block is width × height = \(P(\text{machine}) \times P(\text{defect} \mid \text{machine}) = P(\text{machine} \cap \text{defect})\).</span></div>
+      <div class="rule"><b>Dashed line = weighted average</b><span>If you poured all the orange into one flat layer across the full width, it would sit at the dashed line. Wide columns pull it harder than narrow ones.</span></div>
+      <div class="rule"><b>Flip it and you get Bayes</b><span>Given a defective part, which machine made it? Each machine's share of the orange area. C makes only 20% of parts but 34% of the defects.</span></div>
+    </div>
+
+    <h3>Where the formula comes from</h3>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Step 1 · Split by machine</b><span>Every part comes from exactly one machine, so "defective" splits into non-overlapping pieces: defective from A, from B, from C. Add them (Stage 0's idea).</span></div>
+      <div class="rule"><b>Step 2 · Each piece is a joint</b><span>Use the multiplication rule from Stage 2: \(P(\text{D} \cap \text{A}) = P(\text{D} \mid \text{A})\,P(\text{A})\).</span></div>
+      <div class="rule"><b>Step 3 · Add</b><span>
+        $$P(\text{D}) = 0.02(0.50) + 0.03(0.30) + 0.05(0.20) = 0.010 + 0.009 + 0.010 = 0.029$$</span></div>
+    </div>
+
+    <div class="formula">
+      <div>
+        <div class="t">Law of total probability</div>
+        $$P(A) = \sum_{i} P(A \mid B_i)\,P(B_i)$$
+        <div class="t">Two groups</div>
+        $$P(A) = P(A \mid B)\,P(B) + P(A \mid B^c)\,P(B^c)$$
+      </div>
+      <div>
+        <div class="t">Then Bayes</div>
+        $$P(B_k \mid A) = \frac{P(A \mid B_k)\,P(B_k)}{P(A)}$$
+        <p class="note" style="margin:0">The bottom is the sum on the left.</p>
+      </div>
+    </div>
+    <div class="term-key">
+      <div class="term-key-title">What each piece means</div>
+      <div class="term-key-grid">
+        <div>\(B_1, B_2, \dots\)</div><div>groups that don't overlap and together cover everyone (a <i>partition</i>): the machines</div>
+        <div>\(P(B_i)\)</div><div>each group's size, a marginal: the column widths</div>
+        <div>\(P(A \mid B_i)\)</div><div>the chance inside each group, a conditional: the heights</div>
+        <div>\(P(A)\)</div><div>the overall chance: the dashed line</div>
+      </div>
+    </div>
+
+    <div class="ex-launch">
+      <button class="ex-fab" data-panel="tx4-panel" aria-haspopup="dialog" aria-controls="tx4-panel"><span class="ex-fab-dot" aria-hidden="true">4</span>Worked examples</button>
+      <span class="note">A faulty new machine</span>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 5 ============ -->
+  <section id="together">
+    <div class="eyebrow">Stage 5</div>
+    <h2>Putting It Together</h2>
+    <p class="tagline">Simpson's paradox, and a map of the rules</p>
+    <p>Mixing up marginal and conditional probabilities can flip a conclusion. In a well-known 1986 study of kidney-stone treatments, treatment A did better than B for <b>small</b> stones and also for <b>large</b> stones. Yet B looked better <b>overall</b>. This is <b>Simpson's paradox</b>.</p>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Success rates: kidney-stone treatments</div>
+        <div class="hint">Switch between split and combined</div>
+      </div>
+      <div class="bz-row">Show:
+        <span class="bz-seg" id="s6-view"><button data-v="split" class="on">split by stone size</button><button data-v="all">all patients combined</button></span>
+      </div>
+      <svg class="chart" id="s6-chart" role="img" aria-label="Grouped bars of success rate for treatments A and B"></svg>
+      <div class="legend"><span><i class="lg-tp"></i>Treatment A</span><span><i class="lg-fp"></i>Treatment B</span></div>
+      <div class="sub">Who got which cases</div>
+      <svg class="chart" id="s6-mix" role="img" aria-label="Share of small and large stones in each treatment group"></svg>
+      <div class="result" id="s6-res" style="margin-top:10px"></div>
+    </div>
+
+    <h3>What went wrong</h3>
+    <div class="rules lln-steps">
+      <div class="rule"><b>Step 1 · The conditionals agree</b><span>Small stones: A 81/87 = 93%, B 234/270 = 87%. Large stones: A 192/263 = 73%, B 55/80 = 69%. A wins both.</span></div>
+      <div class="rule"><b>Step 2 · The mix differs</b><span>Doctors gave A to the hard cases: 263 of A's 350 patients had large stones, against 80 of B's 350.</span></div>
+      <div class="rule"><b>Step 3 · The overall rate is a weighted average</b><span>By the law of total probability (Stage 4), each overall rate averages the two conditionals, weighted by that treatment's own mix:
+        $$P(\text{success} \mid A) = 0.93 \cdot \tfrac{87}{350} + 0.73 \cdot \tfrac{263}{350} = 0.78$$
+        $$P(\text{success} \mid B) = 0.87 \cdot \tfrac{270}{350} + 0.69 \cdot \tfrac{80}{350} = 0.83$$
+        A's average leans on its hard cases and B's on its easy ones, so B comes out ahead.</span></div>
+      <div class="rule"><b>Lesson</b><span>When the groups being compared have different mixes, compare like with like: use the conditionals.</span></div>
+    </div>
+
+    <h3>How the types connect</h3>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Map of the rules</div>
+        <div class="hint">Click a box</div>
+      </div>
+      <svg class="chart" id="fm" role="img" aria-label="Map linking the types of probability"></svg>
+      <div class="fm-info" id="fm-info"></div>
+    </div>
+
+    <h3>Cheat sheet</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Type</th><th>Notation</th><th>Formula</th><th>In the table</th><th>Common mistake</th></tr></thead>
+        <tbody>
+          <tr><td>Marginal</td><td>\(P(A)\)</td><td>\(\sum_b P(A \cap b)\)</td><td class="ex">a row or column total ÷ N</td><td class="ex">reading a link into two margins</td></tr>
+          <tr><td>Joint</td><td>\(P(A \cap B)\)</td><td>\(n(A \cap B)/N\)</td><td class="ex">one cell ÷ N</td><td class="ex">dividing by the row total (that's conditional)</td></tr>
+          <tr><td>Conditional</td><td>\(P(A \mid B)\)</td><td>\(P(A \cap B)/P(B)\)</td><td class="ex">one cell ÷ its row or column total</td><td class="ex">swapping \(P(A \mid B)\) and \(P(B \mid A)\)</td></tr>
+          <tr><td>Independence</td><td>\(A \perp B\)</td><td>\(P(A \cap B) = P(A)P(B)\)</td><td class="ex">cell = row total × column total ÷ N</td><td class="ex">confusing it with mutually exclusive</td></tr>
+          <tr><td>Total probability</td><td>\(P(A)\)</td><td>\(\sum_i P(A \mid B_i)P(B_i)\)</td><td class="ex">add down a column, cell by cell</td><td class="ex">averaging rates without the weights</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+</main>
+<div id="tip"></div>
+
+<!-- Worked-examples sidebars: one per stage -->
+<div class="ex-scrim" id="tx-scrim"></div>
+<aside class="ex-panel" id="tx0-panel" role="dialog" aria-modal="true" aria-labelledby="tx0-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Stage 0 · Worked examples</div><h3 id="tx0-title">Marginal probability</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Marginal · from counts</div>
+      <h4>How many emails have a link?</h4>
+      <p>A spam filter's training set has 400 emails. 60 are spam with a link, 20 are spam without one, 90 are normal emails with a link and 230 are normal emails without one.</p>
+      <p class="ex-q">What is P(has a link)? And P(spam)?</p>
+      <ol class="ex-steps">
+        <li>Add down the "Has a link" column, over both kinds of email: \(60 + 90 = 150\).</li>
+        <li>\(P(\text{Link}) = 150/400 = 0.375\), so \(P(\text{No link}) = 1 - 0.375 = 0.625\).</li>
+        <li>Add along the Spam row: \(60 + 20 = 80\), so \(P(\text{Spam}) = 80/400 = 0.20\).</li>
+        <li>Neither number says whether spam emails tend to have links. That needs the cells inside the table.</li>
+      </ol>
+      <div class="ex-ans">P(link) = 0.375 · P(spam) = 0.20</div>
+      <button class="ex-try" data-go="mEmail">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Marginal · from a joint table</div>
+      <h4>Mobile or desktop, bought or left</h4>
+      <p>An online shop's visits, as a joint probability table: mobile and bought 0.06, mobile and left 0.54, desktop and bought 0.08, desktop and left 0.32.</p>
+      <p class="ex-q">What is P(bought)? What is P(mobile)?</p>
+      <ol class="ex-steps">
+        <li>Sum out the device: \(P(\text{Bought}) = 0.06 + 0.08 = 0.14\).</li>
+        <li>Sum out the outcome: \(P(\text{Mobile}) = 0.06 + 0.54 = 0.60\).</li>
+        <li>Check: \(P(\text{Mobile}) + P(\text{Desktop}) = 0.60 + 0.40 = 1\). Starting from probabilities instead of counts changes nothing; the card shows them as visits out of 100.</li>
+      </ol>
+      <div class="ex-ans">P(bought) = 0.14 · P(mobile) = 0.60</div>
+      <button class="ex-try" data-go="mShop">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Marginal · machine learning</div>
+      <h4>The 99.5% accurate fraud model</h4>
+      <p>10,000 card transactions: 30 fraud abroad, 20 fraud at home, 970 genuine abroad, 8,980 genuine at home.</p>
+      <p class="ex-q">What is the marginal P(fraud)? How accurate is a model that never flags anything?</p>
+      <ol class="ex-steps">
+        <li>Add along the Fraud row: \(30 + 20 = 50\), so \(P(\text{Fraud}) = 50/10{,}000 = 0.005\).</li>
+        <li>Always answering "genuine" is right on the other 9,950: accuracy \(= 1 - 0.005 = 0.995\).</li>
+        <li>It catches none of the 50 frauds. The label's marginal is the first thing to check before trusting an accuracy score.</li>
+      </ol>
+      <div class="ex-ans">P(fraud) = 0.005 · do-nothing accuracy = 99.5%</div>
+      <button class="ex-try" data-go="mFraud">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Marginal · continuous</div>
+      <h4>Heights of 170–173 cm, at any weight</h4>
+      <p>In the height × weight card, height is Normal with mean 170 cm and SD 10 cm.</p>
+      <p class="ex-q">What share of adults are 170–173 cm tall, whatever they weigh? Does the link between height and weight change it?</p>
+      <ol class="ex-steps">
+        <li>Collect the whole column of the cloud between 170 and 173 cm, every weight included. That is \(\int f_{X,Y}(x, y)\,dy\) over the column.</li>
+        <li>What's left is the marginal of height: \(P(170 \le X \le 173) = \Phi(0.3) - \Phi(0) \approx 0.118\), about 59 of the 500 people.</li>
+        <li>The correlation never enters. Set it to −0.6 or +0.9: the cloud tilts, but every point keeps its height, so the column count doesn't change at all.</li>
+      </ol>
+      <div class="ex-ans">≈ 0.118, at any correlation</div>
+      <button class="ex-try" data-go="mHeight">Try it in the cloud →</button>
+    </article>
+  </div>
+</aside>
+<aside class="ex-panel" id="tx1-panel" role="dialog" aria-modal="true" aria-labelledby="tx1-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Stage 1 · Worked examples</div><h3 id="tx1-title">Joint probability</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Joint · commute log</div>
+      <h4>Rainy and late</h4>
+      <p>Over 60 school days: 12 were rainy with a late bus, 6 rainy with the bus on time, 9 dry with a late bus, 33 dry with the bus on time.</p>
+      <p class="ex-q">What is P(Rain ∩ Late)? Would multiplying the marginals give the same answer?</p>
+      <ol class="ex-steps">
+        <li>One cell divided by everyone: \(P(\text{Rain} \cap \text{Late}) = 12/60 = 0.20\).</li>
+        <li>Marginals: \(P(\text{Rain}) = 18/60 = 0.30\), \(P(\text{Late}) = 21/60 = 0.35\). The joint is below both, as it must be.</li>
+        <li>Multiplying them gives \(0.30 \times 0.35 = 0.105\), about half the real 0.20. Rain and a late bus go together, so the shortcut is wrong here.</li>
+      </ol>
+      <div class="ex-ans">P(Rain ∩ Late) = 0.20, not 0.105</div>
+      <button class="ex-try" data-go="jCommute">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Joint · bounds</div>
+      <h4>Runners who also lift</h4>
+      <p>A gym has 400 members. 70% run and 50% lift weights.</p>
+      <p class="ex-q">Without asking anyone, what share could do both? Then a survey finds 120 who do both: does it fit?</p>
+      <ol class="ex-steps">
+        <li>Upper bound: the "both" group sits inside the smaller group, so \(P(\text{Run} \cap \text{Lift}) \le \min\{0.70, 0.50\} = 0.50\).</li>
+        <li>Lower bound: \(0.70 + 0.50 = 1.20\) is more than everyone, so at least \(0.70 + 0.50 - 1 = 0.20\) must do both.</li>
+        <li>The survey: \(120/400 = 0.30\), inside \([0.20, 0.50]\). Only the full table pins it down; the two marginals alone allow anything from 80 to 200 people.</li>
+      </ol>
+      <div class="ex-ans">Between 0.20 and 0.50 · actually 0.30</div>
+      <button class="ex-try" data-go="jGym">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Joint · machine learning</div>
+      <h4>A confusion matrix is a joint table</h4>
+      <p>A cat-vs-dog classifier is tested on 200 images. True cats: 90 called cat, 10 called dog. True dogs: 30 called cat, 70 called dog.</p>
+      <p class="ex-q">What is P(true cat ∩ called dog)? What is the accuracy?</p>
+      <ol class="ex-steps">
+        <li>Each cell divided by all 200 is a joint probability of (truth, prediction). \(P(\text{Cat} \cap \text{Said dog}) = 10/200 = 0.05\).</li>
+        <li>The model is right when truth and prediction match: the two diagonal cells. Accuracy \(= P(\text{Cat} \cap \text{Said cat}) + P(\text{Dog} \cap \text{Said dog}) = 0.45 + 0.35 = 0.80\).</li>
+        <li>Check: all four joints add to 1 (\(0.45 + 0.05 + 0.15 + 0.35\)). The errors are \(0.05 + 0.15 = 0.20\), and most of them are dogs called cats.</li>
+      </ol>
+      <div class="ex-ans">P(cat ∩ said dog) = 0.05 · accuracy = 0.80</div>
+      <button class="ex-try" data-go="jConf">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Joint · continuous</div>
+      <h4>Tall and heavy</h4>
+      <p>In the height × weight card, height has mean 170 cm (SD 10) and weight has mean 70 kg (SD 12), with correlation 0.6.</p>
+      <p class="ex-q">What's the chance an adult is both taller than 180 cm and heavier than 82 kg?</p>
+      <ol class="ex-steps">
+        <li>Both cut-offs are 1 SD above the mean, so each marginal is \(P(Z > 1) \approx 0.159\).</li>
+        <li>If height and weight were independent: \(0.159 \times 0.159 \approx 0.025\).</li>
+        <li>They aren't. The volume under the joint density over the corner region (180 cm to ∞, 82 kg to ∞) is about 0.073, nearly 3 times the product: tall people tend to be heavier.</li>
+      </ol>
+      <div class="ex-ans">≈ 0.073 (the product would say 0.025)</div>
+      <button class="ex-try" data-go="jTall">Try it in the cloud →</button>
+    </article>
+  </div>
+</aside>
+<aside class="ex-panel" id="tx2-panel" role="dialog" aria-modal="true" aria-labelledby="tx2-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Stage 2 · Worked examples</div><h3 id="tx2-title">Conditional probability</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Conditional · zoom into a row</div>
+      <h4>Online vs in-person classes</h4>
+      <p>240 students: 120 took a course online (72 passed, 48 failed) and 120 took it in person (96 passed, 24 failed).</p>
+      <p class="ex-q">What is P(passed | online)? How does it compare with P(passed | in person) and the overall pass rate?</p>
+      <ol class="ex-steps">
+        <li>"Given online" means keep only the 120 online students: \(P(\text{Passed} \mid \text{Online}) = 72/120 = 0.60\).</li>
+        <li>Zoom into the other row instead: \(P(\text{Passed} \mid \text{In person}) = 96/120 = 0.80\).</li>
+        <li>Nothing given: \(P(\text{Passed}) = 168/240 = 0.70\). The overall rate sits between the two conditionals; each row tells a different story.</li>
+      </ol>
+      <div class="ex-ans">0.60 online · 0.80 in person · 0.70 overall</div>
+      <button class="ex-try" data-go="cOnline">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Conditional · multiplication rule</div>
+      <h4>Add to cart, then buy</h4>
+      <p>A shop has 1,000 visitors. 30% add something to their cart, and 40% of those go on to buy. Nobody buys without adding to the cart first.</p>
+      <p class="ex-q">What share of all visitors buy? And what is P(added to cart | bought)?</p>
+      <ol class="ex-steps">
+        <li>Multiply along the tree's branch: \(P(\text{Cart} \cap \text{Bought}) = P(\text{Cart})\,P(\text{Bought} \mid \text{Cart}) = 0.30 \times 0.40 = 0.12\), or 120 visitors.</li>
+        <li>The other branch: \(P(\text{Bought} \mid \text{No cart}) = 0\), so it adds nothing. Overall, 12% of visitors buy.</li>
+        <li>Flip it: \(P(\text{Cart} \mid \text{Bought}) = 120/120 = 1\). Every buyer added to the cart, though only 40% of cart-adders buy.</li>
+      </ol>
+      <div class="ex-ans">P(bought) = 0.12 · P(cart | bought) = 1</div>
+      <button class="ex-try" data-go="cCart">Try it in the tree →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Conditional · shrinking the world</div>
+      <h4>The two-child puzzle</h4>
+      <p>A family has two children. Each is a boy or a girl with equal chance, so the four orders BB, BG, GB, GG are equally likely. You learn that at least one child is a girl.</p>
+      <p class="ex-q">What is the chance both children are girls?</p>
+      <ol class="ex-steps">
+        <li>The tempting answer is 1/2. But "given at least one girl" only rules out BB.</li>
+        <li>Three equally likely families are left: BG, GB, GG. Only one of them has two girls.</li>
+        <li>\(P(\text{Both girls} \mid \text{Has a girl}) = \frac{1/4}{3/4} = \frac13\). The condition shrank the world from 4 cases to 3, not to 2.</li>
+      </ol>
+      <div class="ex-ans">1/3, not 1/2</div>
+      <button class="ex-try" data-go="cKids">Try it in the table →</button>
+    </article>
+    <article class="ex-item">
+      <div class="ex-tag">Conditional · medical AI</div>
+      <h4>Recall vs precision</h4>
+      <p>An AI model screens 1,000 scans. 50 patients have the disease; the model flags 45 of them. Of the 950 healthy patients it also flags 95.</p>
+      <p class="ex-q">Find P(flagged | disease) and P(disease | flagged).</p>
+      <ol class="ex-steps">
+        <li>Zoom into the 50 with the disease: \(P(\text{Flagged} \mid \text{Disease}) = 45/50 = 0.90\). In ML this is the <b>recall</b>.</li>
+        <li>Zoom into the \(45 + 95 = 140\) flagged scans: \(P(\text{Disease} \mid \text{Flagged}) = 45/140 \approx 0.321\). This is the <b>precision</b>.</li>
+        <li>Same 45 on top, very different bottoms. "Catches 90% of cases" does not mean "a flag is 90% sure": only about 1 flag in 3 is real, because healthy patients far outnumber sick ones.</li>
+      </ol>
+      <div class="ex-ans">Recall 0.90 · precision ≈ 0.32</div>
+      <button class="ex-try" data-go="cScan">Try it in the table →</button>
+    </article>
+  </div>
+</aside>
+<aside class="ex-panel" id="tx3-panel" role="dialog" aria-modal="true" aria-labelledby="tx3-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Stage 3 · Worked examples</div><h3 id="tx3-title">Independence</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Independence · two dice</div>
+      <h4>Does an even first die change the sum?</h4>
+      <p>Roll two fair dice; all 36 ordered outcomes are equally likely. A = "the first die is even", B = "the sum is 7".</p>
+      <p class="ex-q">Are A and B independent?</p>
+      <ol class="ex-steps">
+        <li>\(P(A) = 18/36 = \tfrac12\). Sums of 7: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1), so \(P(B) = 6/36 = \tfrac16\).</li>
+        <li>Both: (2,5), (4,3), (6,1), so \(P(A \cap B) = 3/36 = \tfrac{1}{12}\).</li>
+        <li>\(P(A)\,P(B) = \tfrac12 \times \tfrac16 = \tfrac{1}{12}\). They match: <b>independent</b>. Whatever the first die shows, exactly one value of the second makes 7.</li>
+        <li>Swap in "sum is 8" and it breaks: the first die is even in 3 of the 5 ways to make 8 [(2,6), (4,4), (6,2)], so the joint is 3/36, but \(\tfrac12 \times \tfrac{5}{36} = 2.5/36\). A first die of 1 can never reach 8.</li>
+      </ol>
+      <div class="ex-ans">Independent for a sum of 7, dependent for a sum of 8</div>
+      <button class="ex-try" data-go="indep">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+<aside class="ex-panel" id="tx4-panel" role="dialog" aria-modal="true" aria-labelledby="tx4-title">
+  <div class="ex-head">
+    <div><div class="eyebrow">Stage 4 · Worked examples</div><h3 id="tx4-title">Law of total probability</h3></div>
+    <button class="ex-close" aria-label="Close examples">✕</button>
+  </div>
+  <div class="ex-body">
+    <article class="ex-item">
+      <div class="ex-tag">Total probability · factory</div>
+      <h4>The faulty new machine</h4>
+      <p>A factory adds a new machine C. A and B each make 40% of parts, with defect rates 1% and 2%. C makes the other 20%, with a defect rate of 9%.</p>
+      <p class="ex-q">What share of all parts is defective, and what share of the defects come from C?</p>
+      <ol class="ex-steps">
+        <li>\(P(D) = 0.40(0.01) + 0.40(0.02) + 0.20(0.09) = 0.004 + 0.008 + 0.018 = 0.030\).</li>
+        <li>The plain average of the rates, \((1 + 2 + 9)/3 = 4\%\), is wrong: it gives C as much weight as A and B, though C makes half as many parts as either.</li>
+        <li>Flip it with Bayes: \(P(C \mid D) = 0.018 / 0.030 = 0.60\). C makes a fifth of the parts but 60% of the defects.</li>
+      </ol>
+      <div class="ex-ans">P(D) = 3.0% · P(C | D) = 60%</div>
+      <button class="ex-try" data-go="total">Try it in the chart →</button>
+    </article>
+  </div>
+</aside>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (tag, attrs, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const txt = (s, attrs, parent) => { const e = mk('text', attrs, parent); e.textContent = s; return e; };
+const fmt = (v, d = 3) => (+v).toFixed(d);
+const big = n => Math.round(n).toLocaleString('en-US');
+const pc = (v, d = 0) => (v * 100).toFixed(d) + '%';
+const tryIt = {}; // worked-example actions, filled in by each stage
+const scrollToCard = id => document.getElementById(id).closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+// segmented buttons: calls onPick(value) and moves the .on class
+function seg(id, onPick) {
+  const el = document.getElementById(id);
+  const set = v => { el.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); onPick(v); };
+  el.querySelectorAll('button').forEach(b => b.onclick = () => set(b.dataset.v));
+  return set;
+}
+
+// ---------- tooltip ----------
+const tip = document.getElementById('tip');
+function showTip(e, html) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY - r.height - 12;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y < 8) y = e.clientY + 16;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => { tip.style.opacity = 0; };
+
+// ---------- data: 2×2 tables ----------
+const SURVEY = { title: '200 people: drink × body clock', rows: ['Coffee', 'Tea'], cols: ['Morning', 'Night'], n: [[80, 40], [30, 50]] };
+// worked-example tables, one per stage
+const EMAIL = { title: '400 emails: spam × link', rows: ['Spam', 'Not spam'], cols: ['Has a link', 'No link'], n: [[60, 20], [90, 230]] };
+const SHOP = { title: '100 shop visits: device × outcome', rows: ['Mobile', 'Desktop'], cols: ['Bought', 'Left'], n: [[6, 54], [8, 32]] };
+const FRAUD = { title: '10,000 transactions: label × place', rows: ['Fraud', 'Genuine'], cols: ['Abroad', 'At home'], n: [[30, 20], [970, 8980]] };
+const COMMUTE = { title: '60 days: weather × bus', rows: ['Rain', 'Dry'], cols: ['Late', 'On time'], n: [[12, 6], [9, 33]] };
+const GYM = { title: '400 gym members: running × weights', rows: ['Run', "Don't run"], cols: ['Lift', "Don't lift"], n: [[120, 160], [80, 40]] };
+const CONF = { title: '200 test images: truth × prediction', rows: ['Cat', 'Dog'], cols: ['Said cat', 'Said dog'], n: [[90, 10], [30, 70]] };
+const ONLINE = { title: '240 students: course format × result', rows: ['Online', 'In person'], cols: ['Passed', 'Failed'], n: [[72, 48], [96, 24]] };
+const CART = { title: '1,000 shop visitors: cart × purchase', rows: ['Cart', 'No cart'], cols: ['Bought', 'Left'], n: [[120, 180], [0, 700]] };
+const KIDS = { title: '4 equally likely families: BB, BG, GB, GG', rows: ['Has a girl', 'No girl'], cols: ['Both girls', 'Not both'], n: [[1, 2], [0, 1]] };
+const SCAN = { title: '1,000 scans: disease × AI flag', rows: ['Disease', 'Healthy'], cols: ['Flagged', 'Not flagged'], n: [[45, 5], [95, 855]] };
+const DICE = { title: '36 rolls of two dice: first die × sum', rows: ['First even', 'First odd'], cols: ['Sum 7', 'Sum not 7'], n: [[3, 15], [3, 15]] };
+const tot = d => {
+  const r = [d.n[0][0] + d.n[0][1], d.n[1][0] + d.n[1][1]], c = [d.n[0][0] + d.n[1][0], d.n[0][1] + d.n[1][1]];
+  return { r, c, N: r[0] + r[1] };
+};
+// count for kind 'c' (cell i,j), 'r' (row total i), 'k' (column total j), 'g' (grand total)
+const cnt = (d, kind, i, j) => { const t = tot(d); return kind === 'c' ? d.n[i][j] : kind === 'r' ? t.r[i] : kind === 'k' ? t.c[j] : t.N; };
+
+// ---------- two-way table ----------
+// render(st): st = {data, cls?(kind,i,j) → '' | 'hl' | 'pick' | 'dim', txt?(kind,i,j,v) → [main, sub], heat?}
+function TwoWay(svg, opts = {}) {
+  const X = [0, 150, 315, 480, 640], Y = [0, 40, 106, 172, 234];
+  svg.setAttribute('viewBox', '0 0 640 234');
+  function render(st) {
+    const d = st.data, t = tot(d);
+    svg.innerHTML = '';
+    const head = (s, x, y, anchor, kind, idx) => {
+      const e = txt(s, { x, y, 'text-anchor': anchor, class: 'tw-head' + (kind ? ' click' : ' muted') }, svg);
+      if (kind) e.onclick = () => opts.onPick && opts.onPick(kind, kind === 'r' ? idx : null, kind === 'k' ? idx : null);
+    };
+    d.cols.forEach((c, j) => head(c, (X[1 + j] + X[2 + j]) / 2, 26, 'middle', 'k', j));
+    head('Total', (X[3] + X[4]) / 2, 26, 'middle');
+    d.rows.forEach((r, i) => head(r, 14, (Y[1 + i] + Y[2 + i]) / 2 + 5, 'start', 'r', i));
+    head('Total', 14, (Y[3] + Y[4]) / 2 + 5, 'start');
+    const maxCell = Math.max(...d.n.flat());
+    const cell = (kind, i, j, x, y, w, h) => {
+      const v = cnt(d, kind, i, j);
+      const g = mk('g', { class: 'tw-c' + (kind !== 'c' ? ' tot' : '') + ' ' + ((st.cls && st.cls(kind, i, j)) || '') }, svg);
+      mk('rect', { class: 'bg', x: x + 3, y: y + 3, width: w - 6, height: h - 6, rx: 9 }, g);
+      if (st.heat && kind === 'c') mk('rect', { class: 'tw-heat', x: x + 3, y: y + 3, width: w - 6, height: h - 6, rx: 9, 'fill-opacity': (0.05 + 0.4 * v / maxCell).toFixed(3) }, g);
+      const [main, sub] = st.txt ? st.txt(kind, i, j, v) : [big(v), kind === 'g' ? 'everyone' : 'P = ' + fmt(v / t.N, 2)];
+      txt(main, { x: x + w / 2, y: y + h / 2 + (sub ? 2 : 7), 'text-anchor': 'middle', class: 'tw-main' }, g);
+      if (sub) txt(sub, { x: x + w / 2, y: y + h / 2 + 20, 'text-anchor': 'middle', class: 'tw-sub' }, g);
+      g.onclick = () => opts.onPick && opts.onPick(kind, i, j);
+      if (opts.tip) {
+        g.onmousemove = e => { const h2 = opts.tip(kind, i, j, v); if (h2) showTip(e, h2); };
+        g.onmouseleave = hideTip;
+      }
+    };
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) cell('c', i, j, X[1 + j], Y[1 + i], X[2 + j] - X[1 + j], Y[2 + i] - Y[1 + i]);
+    for (let i = 0; i < 2; i++) cell('r', i, null, X[3], Y[1 + i], X[4] - X[3], Y[2 + i] - Y[1 + i]);
+    for (let j = 0; j < 2; j++) cell('k', null, j, X[1 + j], Y[3], X[2 + j] - X[1 + j], Y[4] - Y[3]);
+    cell('g', null, null, X[3], Y[3], X[4] - X[3], Y[4] - Y[3]);
+  }
+  return { render };
+}
+const cellTip = d => (kind, i, j, v) => {
+  const N = tot(d).N;
+  const name = kind === 'c' ? `${d.rows[i]} ∩ ${d.cols[j]}` : kind === 'r' ? d.rows[i] : kind === 'k' ? d.cols[j] : 'everyone';
+  return `${name}<br>${big(v)} of ${big(N)} = ${fmt(v / N, 3)}`;
+};
+
+// ---------- Venn diagram ----------
+// regions: 'a' (A only), 'ab' (both), 'b' (B only), 'n' (neither)
+// render(st): st = {names:[A, B], main(region), sub(region), cls?(region), badge?(region)}
+function Venn(svg, opts = {}) {
+  svg.setAttribute('viewBox', '0 0 640 250');
+  const T = '320,72.92', B = '320,207.08';
+  const P = {
+    ab: `M${T} A90,90 0 0 1 ${B} A90,90 0 0 1 ${T}`,
+    a: `M${T} A90,90 0 1 0 ${B} A90,90 0 0 1 ${T}`,
+    b: `M${T} A90,90 0 1 1 ${B} A90,90 0 0 0 ${T}`
+  };
+  const POS = { a: [228, 140], ab: [320, 140], b: [412, 140], n: [86, 140] };
+  function render(st) {
+    svg.innerHTML = '';
+    const reg = (r, el) => {
+      el.setAttribute('class', `vn-r vn-${r} ${(st.cls && st.cls(r)) || ''}`);
+      el.onclick = () => opts.onPick && opts.onPick(r);
+    };
+    reg('n', mk('rect', { x: 1, y: 1, width: 638, height: 248, rx: 12 }, svg));
+    ['a', 'b', 'ab'].forEach(r => reg(r, mk('path', { d: P[r] }, svg)));
+    mk('circle', { cx: 260, cy: 140, r: 90, class: 'vn-ring a' }, svg);
+    mk('circle', { cx: 380, cy: 140, r: 90, class: 'vn-ring b' }, svg);
+    txt(st.names[0], { x: 200, y: 36, 'text-anchor': 'end', class: 'vn-title a' }, svg);
+    txt(st.names[1], { x: 440, y: 36, 'text-anchor': 'start', class: 'vn-title b' }, svg);
+    for (const r in POS) {
+      const [x, y] = POS[r];
+      txt(st.main(r), { x, y, 'text-anchor': 'middle', class: 'vn-lbl' }, svg);
+      txt(st.sub(r), { x, y: y + 17, 'text-anchor': 'middle', class: 'vn-sub' }, svg);
+      const bd = st.badge && st.badge(r);
+      if (bd) txt(bd, { x, y: y - 22, 'text-anchor': 'middle', class: 'vn-badge' }, svg);
+    }
+  }
+  return { render };
+}
+// Venn region ↔ table cell, for A = row ai, B = column bj
+const regionCell = (r, ai, bj) => ({ ab: [ai, bj], a: [ai, 1 - bj], b: [1 - ai, bj], n: [1 - ai, 1 - bj] })[r];
+const regionName = (r, d, ai, bj) => ({ ab: 'both', a: d.rows[ai] + ' only', b: d.cols[bj] + ' only', n: 'neither' })[r];
+
+// =============== STAGE 0: marginal ===============
+(() => {
+  let data = SURVEY, pick = { k: 'r', x: 0 };
+  const tbl = TwoWay(document.getElementById('m0-tbl'), {
+    onPick: (kind, i, j) => {
+      if (kind === 'r' || kind === 'k') pick = { k: kind, x: kind === 'r' ? i : j };
+      else if (kind === 'c') pick = pick.k === 'r' ? { k: 'r', x: i } : { k: 'k', x: j };
+      else return;
+      render();
+    },
+    tip: (kind, i, j, v) => cellTip(data)(kind, i, j, v)
+  });
+  const strip = document.getElementById('m0-strip');
+  strip.setAttribute('viewBox', '0 0 640 96');
+
+  function drawStrip(t) {
+    strip.innerHTML = '';
+    const L = 96, W = 640 - L;
+    [['r', data.rows, t.r, 10], ['k', data.cols, t.c, 54]].forEach(([k, names, vals, y]) => {
+      txt(k === 'r' ? 'rows' : 'columns', { x: 0, y: y + 21, class: 'lbl' }, strip);
+      let x = L;
+      vals.forEach((v, idx) => {
+        const w = W * v / t.N, on = pick.k === k && pick.x === idx;
+        const r = mk('rect', { x: x + 1, y, width: Math.max(0, w - 2), height: 32, rx: 5, class: (idx ? 'ms-bot' : 'ms-top') + (on ? '' : ' ms-faint') }, strip);
+        r.style.cursor = 'pointer';
+        r.onclick = () => { pick = { k, x: idx }; render(); };
+        r.onmousemove = e => showTip(e, `P(${names[idx]}) = ${big(v)}/${big(t.N)} = ${fmt(v / t.N, 3)}`);
+        r.onmouseleave = hideTip;
+        const s = `${names[idx]} ${fmt(v / t.N, 2)}`;
+        if (w > s.length * 8 + 12) txt(s, { x: x + 10, y: y + 21, class: 'ms-txt' }, strip);
+        else if (w > 46) txt(fmt(v / t.N, 2), { x: x + 6, y: y + 21, class: 'ms-txt' }, strip);
+        x += w;
+      });
+    });
+  }
+
+  function render() {
+    const t = tot(data), N = t.N;
+    document.getElementById('m0-title').textContent = data.title;
+    tbl.render({
+      data,
+      cls: (kind, i, j) => {
+        if (kind === 'c') return (pick.k === 'r' ? i === pick.x : j === pick.x) ? 'hl' : 'dim';
+        if (kind === pick.k && (kind === 'r' ? i : j) === pick.x) return 'pick';
+        return '';
+      }
+    });
+    drawStrip(t);
+    const names = pick.k === 'r' ? data.rows : data.cols, other = pick.k === 'r' ? data.cols : data.rows;
+    const name = names[pick.x], sib = names[1 - pick.x];
+    const parts = pick.k === 'r' ? data.n[pick.x] : [data.n[0][pick.x], data.n[1][pick.x]];
+    const m = (parts[0] + parts[1]) / N;
+    const dp = Math.abs(m * 100 - Math.round(m * 100)) < 1e-9 ? 2 : 3; // 0.60, but 0.375
+    document.getElementById('m0-res').innerHTML =
+      `P(${name}) = P(${name} ∩ ${other[0]}) + P(${name} ∩ ${other[1]}) = ${parts[0]}/${N} + ${parts[1]}/${N} = <b>${parts[0] + parts[1]}/${N} = ${fmt(m, dp)}</b>`;
+    document.getElementById('m0-p').textContent = `P(${name}) = ${fmt(m, dp)}`;
+    document.getElementById('m0-q').textContent = `P(${sib}) = 1 − ${fmt(m, dp)} = ${fmt(1 - m, dp)}`;
+  }
+  document.getElementById('m0-reset').onclick = () => { data = SURVEY; pick = { k: 'r', x: 0 }; render(); };
+  const load = (d, k, x) => { data = d; pick = { k, x }; render(); scrollToCard('m0-tbl'); };
+  tryIt.mEmail = () => load(EMAIL, 'k', 0);
+  tryIt.mShop = () => load(SHOP, 'k', 0);
+  tryIt.mFraud = () => load(FRAUD, 'r', 0);
+  render();
+})();
+
+// ---------- Stage 0: continuous marginals (height × weight) ----------
+(() => {
+  const svg = document.getElementById('m0c-chart'), rEl = document.getElementById('m0c-r');
+  const W = 640, H = 430, X0 = 56, X1 = 500, Y0 = 110, Y1 = 386, TOP = 14, RIGHT = 620;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const N = 500, BINS = 22, ZMAX = 3.3;
+  const MH = 170, SH = 10, MW = 70, SW = 12; // height N(170, 10) cm, weight N(70, 12) kg
+  let z1 = [], z2 = [], hover = -1;
+  function draw() { // standard normals via Box–Muller
+    z1 = []; z2 = [];
+    for (let i = 0; i < N; i++) {
+      const u = 1 - Math.random(), v = Math.random(), r = Math.sqrt(-2 * Math.log(u));
+      z1.push(r * Math.cos(2 * Math.PI * v)); z2.push(r * Math.sin(2 * Math.PI * v));
+    }
+  }
+  const sx = z => X0 + (z + ZMAX) / (2 * ZMAX) * (X1 - X0);
+  const sy = z => Y1 - (z + ZMAX) / (2 * ZMAX) * (Y1 - Y0);
+  const bin = z => Math.floor((z + ZMAX) / (2 * ZMAX) * BINS);
+  const phi = z => Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI);
+  const BW = 2 * ZMAX / BINS;
+
+  function render() {
+    const rho = +rEl.value, c = Math.sqrt(1 - rho * rho);
+    document.getElementById('m0c-r-v').textContent = (rho > 0 ? '+' : '') + rho.toFixed(1);
+    const xs = z1, ys = z1.map((a, i) => rho * a + c * z2[i]);
+    const hx = Array(BINS).fill(0), hy = Array(BINS).fill(0);
+    xs.forEach(z => { const b = bin(z); if (b >= 0 && b < BINS) hx[b]++; });
+    ys.forEach(z => { const b = bin(z); if (b >= 0 && b < BINS) hy[b]++; });
+    const dMax = 0.5; // density axis max for both edge plots
+    svg.innerHTML = '';
+    // axes + labels
+    mk('rect', { x: X0, y: Y0, width: X1 - X0, height: Y1 - Y0, class: 'sc-frame' }, svg);
+    [-3, -2, -1, 0, 1, 2, 3].forEach(z => {
+      txt(Math.round(MH + SH * z), { x: sx(z), y: Y1 + 16, 'text-anchor': 'middle', class: 'lbl' }, svg);
+      txt(Math.round(MW + SW * z), { x: X0 - 6, y: sy(z) + 4, 'text-anchor': 'end', class: 'lbl' }, svg);
+    });
+    txt('height (cm) →', { x: (X0 + X1) / 2, y: Y1 + 36, 'text-anchor': 'middle', class: 'lbl' }, svg);
+    txt('weight (kg)', { x: X0 - 6, y: Y0 - 8, 'text-anchor': 'end', class: 'lbl' }, svg);
+    if (hover >= 0) mk('rect', { x: sx(-ZMAX + hover * BW), y: TOP, width: sx(BW) - sx(0), height: Y1 - TOP, class: 'sc-band' }, svg);
+    // points
+    xs.forEach((x, i) => {
+      const y = ys[i];
+      if (Math.abs(x) > ZMAX || Math.abs(y) > ZMAX) return;
+      mk('circle', { cx: sx(x), cy: sy(y), r: 2.6, class: 'sc-pt' + (bin(x) === hover ? ' hl' : '') }, svg);
+    });
+    // top marginal (height)
+    const topY = d => Y0 - 8 - Math.min(d, dMax) / dMax * (Y0 - 8 - TOP);
+    hx.forEach((k, b) => {
+      const d = k / N / BW, x = sx(-ZMAX + b * BW);
+      mk('rect', { x: x + 1, y: topY(d), width: sx(BW) - sx(0) - 2, height: Y0 - 8 - topY(d), class: 'bar' + (b === hover ? ' hl' : '') }, svg);
+    });
+    let d = '';
+    for (let z = -ZMAX; z <= ZMAX + 1e-9; z += 0.05) d += (d ? 'L' : 'M') + sx(z).toFixed(1) + ',' + topY(phi(z)).toFixed(1);
+    mk('path', { d, class: 'prior-line' }, svg);
+    // right marginal (weight)
+    const rX = d2 => X1 + 8 + Math.min(d2, dMax) / dMax * (RIGHT - X1 - 8);
+    hy.forEach((k, b) => {
+      const d2 = k / N / BW, y = sy(-ZMAX + (b + 1) * BW);
+      mk('rect', { x: X1 + 8, y: y + 1, width: rX(d2) - X1 - 8, height: sy(0) - sy(BW) - 2, class: 'bar' }, svg);
+    });
+    d = '';
+    for (let z = -ZMAX; z <= ZMAX + 1e-9; z += 0.05) d += (d ? 'L' : 'M') + rX(phi(z)).toFixed(1) + ',' + sy(z).toFixed(1);
+    mk('path', { d, class: 'prior-line' }, svg);
+    // hover layer over the cloud
+    const hit = mk('rect', { x: X0, y: TOP, width: X1 - X0, height: Y1 - TOP, class: 'hit' }, svg);
+    hit.onmousemove = e => {
+      const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W;
+      const b = Math.max(0, Math.min(BINS - 1, Math.floor((x - X0) / (X1 - X0) * BINS)));
+      if (b !== hover) { hover = b; render(); }
+    };
+    hit.onmouseleave = () => { hover = -1; render(); };
+
+    const res = document.getElementById('m0c-res');
+    if (hover >= 0) {
+      const lo = MH + SH * (-ZMAX + hover * BW), hi = lo + SH * BW;
+      res.innerHTML = `Heights ${lo.toFixed(1)}–${hi.toFixed(1)} cm: <b>${hx[hover]}</b> of ${N} people, at every weight. Stacked into one bar on top, that's the marginal: P(height in this range) ≈ <b>${fmt(hx[hover] / N, 3)}</b>.`;
+    } else res.innerHTML = `Hover over the cloud to collect one column. The top edge is the marginal of height, N(${MH}, ${SH}²); the right edge is the marginal of weight, N(${MW}, ${SW}²).`;
+    document.getElementById('m0c-chip').textContent = `correlation ${rho.toFixed(1)} · marginals unchanged`;
+  }
+  rEl.oninput = render;
+  document.getElementById('m0c-new').onclick = () => { draw(); render(); };
+  // column 11 of 22 covers z 0 to 0.3: 170–173 cm
+  tryIt.mHeight = () => { rEl.value = -0.6; hover = 11; render(); scrollToCard('m0c-chart'); };
+  draw();
+  render();
+})();
+
+// =============== STAGE 1: joint ===============
+(() => {
+  let data = SURVEY, cell = [0, 0], mode = 'count';
+  const tbl = TwoWay(document.getElementById('j1-tbl'), {
+    onPick: (kind, i, j) => { if (kind === 'c') { cell = [i, j]; render(); } },
+    tip: (kind, i, j, v) => cellTip(data)(kind, i, j, v)
+  });
+  const venn = Venn(document.getElementById('j1-venn'), {
+    onPick: r => { cell = regionCell(r, 0, 0); render(); }
+  });
+
+  function render() {
+    const t = tot(data), N = t.N, [ci, cj] = cell;
+    document.getElementById('j1-title').textContent = data.title;
+    tbl.render({
+      data, heat: true,
+      txt: (kind, i, j, v) => mode === 'count'
+        ? [big(v), kind === 'g' ? 'everyone' : 'P = ' + fmt(v / N, 2)]
+        : [fmt(v / N, 2), big(v) + ' of ' + big(N)],
+      cls: (kind, i, j) => kind === 'c' ? (i === ci && j === cj ? 'hl' : '')
+        : (kind === 'r' && i === ci) || (kind === 'k' && j === cj) ? 'pick' : ''
+    });
+    const sel = ['ab', 'a', 'b', 'n'].find(r => { const [i, j] = regionCell(r, 0, 0); return i === ci && j === cj; });
+    venn.render({
+      names: [data.rows[0], data.cols[0]],
+      main: r => { const [i, j] = regionCell(r, 0, 0); return mode === 'count' ? big(data.n[i][j]) : fmt(data.n[i][j] / N, 2); },
+      sub: r => regionName(r, data, 0, 0),
+      cls: r => r === sel ? 'hl' : ''
+    });
+    const v = data.n[ci][cj], name = `${data.rows[ci]} ∩ ${data.cols[cj]}`;
+    document.getElementById('j1-res').innerHTML =
+      `P(${name}) = ${v}/${N} = <b>${fmt(v / N, 3)}</b>. It's no bigger than either marginal: P(${data.rows[ci]}) = ${fmt(t.r[ci] / N, 3)}, P(${data.cols[cj]}) = ${fmt(t.c[cj] / N, 3)}.`;
+    document.getElementById('j1-p').textContent = `P(${name}) = ${fmt(v / N, 3)}`;
+    document.getElementById('j1-sum').textContent = 'all four cells add to ' + fmt(data.n.flat().reduce((a, b) => a + b, 0) / N, 2);
+  }
+  seg('j1-mode', v => { mode = v; render(); });
+  document.getElementById('j1-reset').onclick = () => { data = SURVEY; cell = [0, 0]; render(); };
+  const load = (d, c) => { data = d; cell = c; render(); scrollToCard('j1-tbl'); };
+  tryIt.jCommute = () => load(COMMUTE, [0, 0]);
+  tryIt.jGym = () => load(GYM, [0, 0]);
+  tryIt.jConf = () => load(CONF, [0, 1]);
+  render();
+})();
+
+// ---------- Stage 1: real survey vs independent ----------
+(() => {
+  const d = SURVEY, t = tot(d), N = t.N;
+  const ind = (i, j) => t.r[i] * t.c[j] / N;
+  let mode = 'real', cell = [0, 0];
+  const tbl = TwoWay(document.getElementById('j1i-tbl'), {
+    onPick: (kind, i, j) => { if (kind === 'c') { cell = [i, j]; render(); } },
+    tip: (kind, i, j, v) => kind === 'c'
+      ? `${d.rows[i]} ∩ ${d.cols[j]}<br>real ${d.n[i][j]} · independent ${fmt(ind(i, j), 1).replace(/\.0$/, '')}`
+      : cellTip(d)(kind, i, j, v)
+  });
+  function render() {
+    const [ci, cj] = cell, real = d.n[ci][cj], pr = t.r[ci] / N, pc2 = t.c[cj] / N;
+    const shown = mode === 'real' ? d : { ...d, n: [[ind(0, 0), ind(0, 1)], [ind(1, 0), ind(1, 1)]] };
+    tbl.render({
+      data: shown, heat: true,
+      cls: (kind, i, j) => kind === 'c' && i === ci && j === cj ? 'hl' : (kind === 'r' && i === ci) || (kind === 'k' && j === cj) ? 'pick' : '',
+      txt: (kind, i, j, v) => kind !== 'c' ? [big(v), kind === 'g' ? 'everyone' : 'P = ' + fmt(v / N, 2)]
+        : mode === 'real' ? [big(v), 'independent: ' + fmt(ind(i, j), 1).replace(/\.0$/, '')]
+        : [fmt(v, 1).replace(/\.0$/, ''), `${fmt(t.r[i] / N, 2)} × ${fmt(t.c[j] / N, 2)} × ${N}`]
+    });
+    const name = `${d.rows[ci]} ∩ ${d.cols[cj]}`, cond = real / t.r[ci];
+    document.getElementById('j1i-res').innerHTML = mode === 'real'
+      ? `Always-true rule: P(${name}) = P(${d.rows[ci]}) × P(${d.cols[cj]} | ${d.rows[ci]}) = ${fmt(pr, 2)} × ${fmt(cond, 3)} = <b>${fmt(real / N, 3)}</b>. Multiplying the marginals instead gives ${fmt(pr, 2)} × ${fmt(pc2, 2)} = ${fmt(pr * pc2, 3)}, which is wrong here because the two are linked.`
+      : `If drink and body clock were independent, P(${d.cols[cj]} | ${d.rows[ci]}) would equal P(${d.cols[cj]}) = ${fmt(pc2, 2)}, so P(${name}) = ${fmt(pr, 2)} × ${fmt(pc2, 2)} = <b>${fmt(pr * pc2, 3)}</b>. Same margins as the real survey, different inside.`;
+    document.getElementById('j1i-p').textContent = `real P(${name}) = ${fmt(real / N, 3)}`;
+    document.getElementById('j1i-q').textContent = `product of marginals = ${fmt(pr * pc2, 3)}`;
+  }
+  seg('j1i-mode', v => { mode = v; render(); });
+  render();
+})();
+
+// ---------- Stage 1: continuous joint (draw a box) ----------
+(() => {
+  const svg = document.getElementById('j1c-chart'), rEl = document.getElementById('j1c-r');
+  const W = 640, H = 400, X0 = 56, X1 = 626, Y0 = 14, Y1 = 352, ZMAX = 3.3, N = 500;
+  const MH = 170, SH = 10, MW = 70, SW = 12;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  // standard normal CDF (Abramowitz–Stegun 7.1.26 erf)
+  const Phi = z => {
+    const x = Math.abs(z) / Math.SQRT2, t = 1 / (1 + 0.3275911 * x);
+    const e = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return z >= 0 ? (1 + e) / 2 : (1 - e) / 2;
+  };
+  const edge = z => z <= -ZMAX + 1e-9 ? -9 : z >= ZMAX - 1e-9 ? 9 : z; // box at the axis edge = "and beyond"
+  // P(a ≤ Z1 ≤ b, c ≤ Z2 ≤ d) for a standard bivariate normal with correlation rho (Simpson's rule)
+  function boxProb(a, b, c, d, rho) {
+    a = edge(a); b = edge(b); c = edge(c); d = edge(d);
+    const k = Math.sqrt(1 - rho * rho), n = 400, h = (b - a) / n;
+    let s = 0;
+    for (let i = 0; i <= n; i++) {
+      const z = a + i * h, w = i === 0 || i === n ? 1 : i % 2 ? 4 : 2;
+      s += w * Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI) * (Phi((d - rho * z) / k) - Phi((c - rho * z) / k));
+    }
+    return s * h / 3;
+  }
+  const sx = z => X0 + (z + ZMAX) / (2 * ZMAX) * (X1 - X0), sy = z => Y1 - (z + ZMAX) / (2 * ZMAX) * (Y1 - Y0);
+  const zx = px => Math.max(-ZMAX, Math.min(ZMAX, (px - X0) / (X1 - X0) * 2 * ZMAX - ZMAX));
+  const zy = py => Math.max(-ZMAX, Math.min(ZMAX, (Y1 - py) / (Y1 - Y0) * 2 * ZMAX - ZMAX));
+  let z1 = [], z2 = [], box = [-1, 1, -10 / 12, 10 / 12], drag = null;
+  function draw() {
+    z1 = []; z2 = [];
+    for (let i = 0; i < N; i++) {
+      const u = 1 - Math.random(), v = Math.random(), r = Math.sqrt(-2 * Math.log(u));
+      z1.push(r * Math.cos(2 * Math.PI * v)); z2.push(r * Math.sin(2 * Math.PI * v));
+    }
+  }
+  const cm = z => z <= -ZMAX + 1e-9 ? '−∞' : z >= ZMAX - 1e-9 ? '∞' : (MH + SH * z).toFixed(0);
+  const kg = z => z <= -ZMAX + 1e-9 ? '−∞' : z >= ZMAX - 1e-9 ? '∞' : (MW + SW * z).toFixed(0);
+
+  function render() {
+    const rho = +rEl.value, c = Math.sqrt(1 - rho * rho);
+    document.getElementById('j1c-r-v').textContent = (rho > 0 ? '+' : '') + rho.toFixed(1);
+    const [a, b, lo, hi] = box;
+    svg.innerHTML = '';
+    mk('rect', { x: X0, y: Y0, width: X1 - X0, height: Y1 - Y0, class: 'sc-frame' }, svg);
+    [-3, -2, -1, 0, 1, 2, 3].forEach(z => {
+      txt(Math.round(MH + SH * z), { x: sx(z), y: Y1 + 16, 'text-anchor': 'middle', class: 'lbl' }, svg);
+      txt(Math.round(MW + SW * z), { x: X0 - 6, y: sy(z) + 4, 'text-anchor': 'end', class: 'lbl' }, svg);
+    });
+    txt('height (cm) →', { x: (X0 + X1) / 2, y: Y1 + 36, 'text-anchor': 'middle', class: 'lbl' }, svg);
+    txt('kg', { x: X0 - 6, y: Y0 + 4, 'text-anchor': 'end', class: 'lbl' }, svg);
+    mk('rect', { x: sx(a), y: sy(hi), width: sx(b) - sx(a), height: sy(lo) - sy(hi), class: 'j1c-box' }, svg);
+    let k = 0;
+    z1.forEach((x, i) => {
+      const y = rho * x + c * z2[i], inBox = x >= a && x <= b && y >= lo && y <= hi;
+      if (inBox) k++;
+      if (Math.abs(x) > ZMAX || Math.abs(y) > ZMAX) return;
+      mk('circle', { cx: sx(x), cy: sy(y), r: 2.6, class: 'sc-pt' + (inBox ? ' hl' : '') }, svg);
+    });
+    // in-box points beyond the visible edge still count when the box reaches that edge
+    const P = boxProb(a, b, lo, hi, rho), px = Phi(edge(b)) - Phi(edge(a)), py = Phi(edge(hi)) - Phi(edge(lo));
+    const cdf = a <= -ZMAX + 1e-9 && lo <= -ZMAX + 1e-9;
+    const name = cdf ? `P(height ≤ ${cm(b)} cm, weight ≤ ${kg(hi)} kg)` : `P(${cm(a)}–${cm(b)} cm and ${kg(lo)}–${kg(hi)} kg)`;
+    document.getElementById('j1c-res').innerHTML =
+      `${name}: <b>${k}</b> of ${N} points inside = <b>${fmt(k / N, 3)}</b>. Exact volume under the density: <b>${fmt(P, 3)}</b>. ` +
+      `Product of the marginals: ${fmt(px, 3)} × ${fmt(py, 3)} = ${fmt(px * py, 3)}` +
+      (Math.abs(rho) < 1e-9 ? ', the same, because at correlation 0 the two are independent.' : `, which is ${P > px * py ? 'smaller' : 'larger'}: the two are linked.`) +
+      (cdf ? ' A box from −∞ like this is the joint CDF.' : '');
+    document.getElementById('j1c-p').textContent = `joint ≈ ${fmt(P, 3)}`;
+    document.getElementById('j1c-q').textContent = `product = ${fmt(px * py, 3)}`;
+  }
+  const toSvg = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; };
+  svg.addEventListener('pointerdown', e => {
+    const [x, y] = toSvg(e);
+    if (x < X0 || x > X1 || y < Y0 || y > Y1) return;
+    drag = [zx(x), zy(y)];
+    svg.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const [x, y] = toSvg(e), u = zx(x), v = zy(y);
+    if (Math.abs(u - drag[0]) < 0.05 || Math.abs(v - drag[1]) < 0.05) return;
+    box = [Math.min(drag[0], u), Math.max(drag[0], u), Math.min(drag[1], v), Math.max(drag[1], v)];
+    render();
+  });
+  const end = () => { drag = null; };
+  svg.addEventListener('pointerup', end);
+  svg.addEventListener('pointercancel', end);
+  rEl.oninput = render;
+  document.getElementById('j1c-cdf').onclick = () => { box = [-ZMAX, box[1], -ZMAX, box[3]]; render(); };
+  document.getElementById('j1c-box').onclick = () => { box = [-1, 1, -10 / 12, 10 / 12]; render(); };
+  document.getElementById('j1c-new').onclick = () => { draw(); render(); };
+  tryIt.jTall = () => { rEl.value = 0.6; box = [1, ZMAX, 1, ZMAX]; render(); scrollToCard('j1c-chart'); };
+  draw();
+  render();
+})();
+
+// =============== STAGE 2: conditional ===============
+(() => {
+  let data = SURVEY, given = 'r0', ask = 'k0', first = 'r';
+  const tbl = TwoWay(document.getElementById('c2-tbl'), {
+    onPick: (kind, i, j) => {
+      if (kind === 'r') setGiven('r' + i);
+      else if (kind === 'k') setGiven('k' + j);
+      else if (kind === 'g') setGiven('none');
+      else if (kind === 'c') { // ask about the cell's other variable
+        if (given[0] === 'r') setAsk('k' + j); else if (given[0] === 'k') setAsk('r' + i); else setAsk(ask[0] === 'r' ? 'r' + i : 'k' + j);
+      }
+    },
+    tip: (kind, i, j, v) => cellTip(data)(kind, i, j, v)
+  });
+  const tree = document.getElementById('c2-tree');
+  tree.setAttribute('viewBox', '0 0 640 236');
+  const nameOf = v => v === 'none' ? 'everyone' : v[0] === 'r' ? data.rows[+v[1]] : data.cols[+v[1]];
+  const inSet = (v, i, j) => v === 'none' || (v[0] === 'r' ? i === +v[1] : j === +v[1]);
+  const countOf = v => { const t = tot(data); return v === 'none' ? t.N : v[0] === 'r' ? t.r[+v[1]] : t.c[+v[1]]; };
+
+  const givenEl = document.getElementById('c2-given'), askEl = document.getElementById('c2-ask');
+  const setGiven = seg('c2-given', v => {
+    given = v;
+    if (given !== 'none' && ask[0] === given[0]) ask = (ask[0] === 'r' ? 'k' : 'r') + '0';
+    render();
+  });
+  const setAsk = seg('c2-ask', v => { ask = v; render(); });
+  const setFirst = seg('c2-first', v => { first = v; render(); });
+
+  function labels() {
+    givenEl.querySelectorAll('button').forEach(b => { if (b.dataset.v !== 'none') b.textContent = nameOf(b.dataset.v); });
+    askEl.querySelectorAll('button').forEach(b => {
+      b.textContent = nameOf(b.dataset.v) + '?';
+      b.disabled = given !== 'none' && b.dataset.v[0] === given[0];
+      b.classList.toggle('on', b.dataset.v === ask);
+    });
+    givenEl.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === given));
+    const fb = document.getElementById('c2-first').querySelectorAll('button');
+    fb[0].textContent = data.rows.join(' / '); fb[1].textContent = data.cols.join(' / ');
+  }
+
+  function drawTree() {
+    tree.innerHTML = '';
+    const t = tot(data), N = t.N;
+    const A = first === 'r' ? data.rows : data.cols, Bn = first === 'r' ? data.cols : data.rows;
+    const n = (a, b) => first === 'r' ? data.n[a][b] : data.n[b][a];
+    const aTot = first === 'r' ? t.r : t.c;
+    // which leaves match the question
+    const hit = (a, b) => { const [i, j] = first === 'r' ? [a, b] : [b, a]; return inSet(given, i, j) && inSet(ask, i, j); };
+    const box = (x, y, w, h, l1, l2, on) => {
+      mk('rect', { x, y: y - h / 2, width: w, height: h, rx: 8, class: 'tree-box' + (on ? ' pos' : '') }, tree);
+      txt(l1, { x: x + 10, y: y - (l2 ? 3 : -4), class: 'tree-txt' }, tree);
+      if (l2) txt(l2, { x: x + 10, y: y + 13, class: 'tree-sub' }, tree);
+    };
+    const edge = (x1, y1, x2, y2, label, on) => {
+      mk('path', { d: `M${x1},${y1} C${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`, class: 'tree-edge' + (on ? ' pos' : '') }, tree);
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      mk('rect', { x: mx - 22, y: my - 10, width: 44, height: 18, rx: 4, class: 'fm-elbg' }, tree);
+      txt(label, { x: mx, y: my + 4, 'text-anchor': 'middle', class: 'tree-sub' }, tree);
+    };
+    const Y1 = [62, 174], Y2 = [[28, 92], [144, 208]];
+    let anyRoot = false;
+    [0, 1].forEach(a => {
+      const pa = aTot[a] / N;
+      const onA = [0, 1].some(b => hit(a, b));
+      anyRoot = anyRoot || onA;
+      edge(110, 118, 200, Y1[a], fmt(pa, 2), onA);
+      [0, 1].forEach(b => {
+        const pb = aTot[a] ? n(a, b) / aTot[a] : 0, on = hit(a, b);
+        edge(330, Y1[a], 400, Y2[a][b], fmt(pb, 2), on);
+        box(400, Y2[a][b], 236, 46, `${A[a]} ∩ ${Bn[b]}`, `${fmt(pa, 2)} × ${fmt(pb, 2)} = ${fmt(n(a, b) / N, 2)}`, on);
+      });
+      box(200, Y1[a], 130, 46, A[a], big(aTot[a]) + ' of ' + big(N), onA);
+    });
+    box(10, 118, 100, 46, 'Everyone', big(N), anyRoot);
+  }
+
+  function render() {
+    labels();
+    const N = tot(data).N, gi = given, G = countOf(gi);
+    tbl.render({
+      data,
+      cls: (kind, i, j) => {
+        if (kind === 'c') return !inSet(gi, i, j) ? 'dim' : inSet(ask, i, j) ? 'hl' : '';
+        const isG = (kind === 'r' && gi === 'r' + i) || (kind === 'k' && gi === 'k' + j) || (kind === 'g' && gi === 'none');
+        return isG ? 'pick' : gi === 'none' ? '' : 'dim';
+      },
+      txt: (kind, i, j, v) => kind === 'c' && gi !== 'none' && inSet(gi, i, j)
+        ? [big(v), pc(v / G) + ' of ' + nameOf(gi)]
+        : [big(v), kind === 'g' ? 'everyone' : 'P = ' + fmt(v / N, 2)]
+    });
+    let k = 0;
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) if (inSet(gi, i, j) && inSet(ask, i, j)) k += data.n[i][j];
+    const P = G ? k / G : 0, an = nameOf(ask), gn = nameOf(gi), A = countOf(ask);
+    const res = document.getElementById('c2-res');
+    if (gi === 'none') {
+      res.innerHTML = `Nothing given: the whole table is the world. P(${an}) = ${k}/${N} = <b>${fmt(P, 3)}</b>. That's just the marginal from Stage 0.`;
+      document.getElementById('c2-p').textContent = `P(${an}) = ${fmt(P, 3)}`;
+      document.getElementById('c2-flip').textContent = 'pick a "given" to zoom in';
+    } else {
+      res.innerHTML = `Zoom into the <b>${G}</b> with ${gn}. <b>${k}</b> of them are ${an}: P(${an} | ${gn}) = ${k}/${G} = <b>${fmt(P, 3)}</b>. Flipped: P(${gn} | ${an}) = ${k}/${A} = <b>${fmt(k / A, 3)}</b>. Same top, different bottom.`;
+      document.getElementById('c2-p').textContent = `P(${an} | ${gn}) = ${fmt(P, 3)}`;
+      document.getElementById('c2-flip').textContent = `P(${gn} | ${an}) = ${fmt(k / A, 3)}`;
+    }
+    drawTree();
+  }
+  const load = (d, g, a) => { data = d; given = g; ask = a; render(); };
+  document.getElementById('c2-reset').onclick = () => load(SURVEY, 'r0', 'k0');
+  const tryLoad = (d, g, a) => { load(d, g, a); scrollToCard('c2-tbl'); };
+  tryIt.cOnline = () => tryLoad(ONLINE, 'r0', 'k0');
+  tryIt.cCart = () => { setFirst('r'); load(CART, 'r0', 'k0'); scrollToCard('c2-tree'); };
+  tryIt.cKids = () => tryLoad(KIDS, 'r0', 'k0');
+  tryIt.cScan = () => tryLoad(SCAN, 'r0', 'k0');
+  render();
+})();
+
+// =============== STAGE 3: independence ===============
+(() => {
+  let data = SURVEY;
+  const svg = document.getElementById('i4-mosaic'), aEl = document.getElementById('i4-a');
+  const W = 640, H = 250, L = 10, R = 10, T = 10, B = 34;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  let R0, C0, N; // fixed margins: first row total, first column total, grand total
+  let mode = 'count';
+  // 2 decimals when exact enough (survey), otherwise 3 (dice: 3/36)
+  const p3 = v => Math.abs(v * 100 - Math.round(v * 100)) < 1e-9 ? fmt(v, 2) : fmt(v, 3);
+  const tbl = TwoWay(document.getElementById('i4-tbl'), {
+    tip: (kind, i, j) => {
+      if (kind !== 'c') return null;
+      const a = +aEl.value, n = [[a, R0 - a], [C0 - a, N - R0 - C0 + a]], rt = [R0, N - R0], ct = [C0, N - C0];
+      return `${data.rows[i]} ∩ ${data.cols[j]}<br>real ${n[i][j]}<br>independent: ${rt[i]} × ${ct[j]} / ${N} = ${fmt(rt[i] * ct[j] / N, 1)}`;
+    }
+  });
+
+  function setup(d) {
+    data = d; const t = tot(d);
+    R0 = t.r[0]; C0 = t.c[0]; N = t.N;
+    aEl.min = Math.max(0, R0 + C0 - N); aEl.max = Math.min(R0, C0); aEl.value = d.n[0][0];
+  }
+  function render() {
+    const a = +aEl.value, n = [[a, R0 - a], [C0 - a, N - R0 - C0 + a]];
+    const rt = [R0, N - R0], top = 'ms-top', pM = C0 / N;
+    const ct = [C0, N - C0], exp = (i, j) => rt[i] * ct[j] / N, e1 = v => fmt(v, 1).replace(/\.0$/, '');
+    tbl.render({
+      data: { ...data, n }, heat: true,
+      cls: (kind, i, j) => kind === 'c' ? (Math.abs(n[i][j] - exp(i, j)) < 1e-9 ? '' : 'hl') : '',
+      txt: (kind, i, j, v) => {
+        const ok = kind === 'c' && Math.abs(v - exp(i, j)) < 1e-9;
+        if (mode === 'prob') {
+          if (kind !== 'c') return [p3(v / N), kind === 'g' ? 'everyone' : big(v) + ' of ' + big(N)];
+          return [p3(v / N), ok ? '= independent ✓' : `${p3(rt[i] / N)} × ${p3(ct[j] / N)} = ${p3(exp(i, j) / N)}`];
+        }
+        if (kind !== 'c') return [big(v), kind === 'g' ? 'everyone' : 'P = ' + fmt(v / N, 2)];
+        return [big(v), ok ? '= independent ✓' : 'independent: ' + e1(exp(i, j))];
+      }
+    });
+    document.getElementById('i4-a-lbl').firstChild.textContent = `${data.rows[0]} ∩ ${data.cols[0]} (count) `;
+    document.getElementById('i4-a-v').textContent = a;
+    document.getElementById('i4-lg0').textContent = data.cols[0];
+    document.getElementById('i4-lg1').textContent = data.cols[1];
+    document.getElementById('i4-lgm').textContent = `overall P(${data.cols[0]})`;
+    svg.innerHTML = '';
+    const PW = W - L - R - 8, PH = H - T - B;
+    let x = L;
+    [0, 1].forEach(i => {
+      const w = PW * rt[i] / N, ph = rt[i] ? n[i][0] / rt[i] : 0, h0 = PH * ph;
+      const blk = (y, h, cls, j) => {
+        const r = mk('rect', { x, y, width: Math.max(0, w), height: Math.max(0, h), class: cls }, svg);
+        r.onmousemove = e => showTip(e, `${data.rows[i]} ∩ ${data.cols[j]}: ${n[i][j]}<br>P(${data.cols[j]} | ${data.rows[i]}) = ${n[i][j]}/${rt[i]} = ${fmt(rt[i] ? n[i][j] / rt[i] : 0, 3)}`);
+        r.onmouseleave = hideTip;
+        if (h > 22 && w > 60) txt(pc(rt[i] ? n[i][j] / rt[i] : 0), { x: x + 10, y: y + 20, class: 'ms-txt' }, svg);
+      };
+      blk(T, h0, top, 0);
+      blk(T + h0, PH - h0, 'ms-bot', 1);
+      txt(`${data.rows[i]} (${pc(rt[i] / N)})`, { x: x + w / 2, y: H - 12, 'text-anchor': 'middle', class: 'lbl' }, svg);
+      x += w + 8;
+    });
+    const ly = T + PH * pM;
+    mk('line', { x1: L, x2: W - R, y1: ly, y2: ly, class: 'ms-line' }, svg);
+    const s = `P(${data.cols[0]}) = ${fmt(pM, 2)}`, tw = s.length * 7.4 + 12;
+    mk('rect', { x: W - R - tw - 6, y: ly - 22, width: tw, height: 18, rx: 4, class: 'ms-lblbg' }, svg);
+    txt(s, { x: W - R - 12, y: ly - 9, 'text-anchor': 'end', class: 'ms-lbl' }, svg);
+
+    const c0 = n[0][0] / rt[0], c1 = rt[1] ? n[1][0] / rt[1] : 0, prod = R0 * C0 / N;
+    document.getElementById('i4-c0').textContent = `P(${data.cols[0]} | ${data.rows[0]}) = ${fmt(c0, 2)}`;
+    document.getElementById('i4-c1').textContent = `P(${data.cols[0]} | ${data.rows[1]}) = ${fmt(c1, 2)}`;
+    const indep = Math.abs(a - prod) < 1e-9, near = Math.abs(a - prod) < 0.5;
+    document.getElementById('i4-v').textContent = indep ? 'independent' : near ? 'as close as whole counts allow' : a > prod ? 'linked: more than chance' : 'linked: less than chance';
+    document.getElementById('i4-res').innerHTML =
+      `Joint P(${data.rows[0]} ∩ ${data.cols[0]}) = ${a}/${N} = <b>${fmt(a / N, 3)}</b>. Product of marginals ${fmt(R0 / N, 3)} × ${fmt(pM, 3)} = <b>${fmt(prod / N, 3)}</b> (${fmt(prod, 1).replace(/\.0$/, '')} of ${N}).` +
+      (indep ? ' They match: <b>independent</b>.' : ` They differ, so the two are <b>dependent</b>.`);
+  }
+  aEl.oninput = render;
+  seg('i4-mode', v => { mode = v; render(); });
+  document.getElementById('i4-ind').onclick = () => { aEl.value = Math.round(R0 * C0 / N); render(); };
+  document.getElementById('i4-reset').onclick = () => { setup(SURVEY); render(); };
+  tryIt.indep = () => { setup(DICE); render(); scrollToCard('i4-mosaic'); };
+  setup(SURVEY);
+  render();
+})();
+
+// =============== STAGE 4: law of total probability ===============
+(() => {
+  const ids = ['sa', 'sb', 'ra', 'rb', 'rc'], el = {};
+  ids.forEach(k => el[k] = document.getElementById('t5-' + k));
+  const svg = document.getElementById('t5-chart');
+  const W = 640, H = 250, L = 46, R = 12, T = 14, B = 34, YMAX = 0.1, GAP = 6;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const sy = p => T + (1 - p / YMAX) * (H - T - B);
+
+  function render(changed) {
+    // keep C's share at least 10%
+    if (+el.sa.value + +el.sb.value > 90) {
+      if (changed === 'sb') el.sa.value = 90 - +el.sb.value; else el.sb.value = 90 - +el.sa.value;
+    }
+    const s = [+el.sa.value / 100, +el.sb.value / 100], r = [+el.ra.value / 100, +el.rb.value / 100, +el.rc.value / 100];
+    s.push(1 - s[0] - s[1]);
+    const names = ['A', 'B', 'C'];
+    document.getElementById('t5-sa-v').textContent = pc(s[0]);
+    document.getElementById('t5-sb-v').textContent = pc(s[1]) + ' (C: ' + pc(s[2]) + ')';
+    ['ra', 'rb', 'rc'].forEach((k, i) => document.getElementById(`t5-${k}-v`).textContent = pc(r[i], 1));
+    const j = s.map((v, i) => v * r[i]), D = j[0] + j[1] + j[2];
+
+    svg.innerHTML = '';
+    [0, 0.02, 0.04, 0.06, 0.08, 0.1].forEach(p => {
+      mk('line', { x1: L, x2: W - R, y1: sy(p), y2: sy(p), class: 'grid' }, svg);
+      txt(pc(p), { x: L - 6, y: sy(p) + 4, 'text-anchor': 'end', class: 'lbl' }, svg);
+    });
+    const PW = W - L - R - GAP * 2;
+    let x = L;
+    s.forEach((v, i) => {
+      const w = PW * v;
+      mk('rect', { x, y: sy(YMAX), width: w, height: sy(0) - sy(YMAX), class: 'tp-col' }, svg);
+      const f = mk('rect', { x, y: sy(r[i]), width: w, height: sy(0) - sy(r[i]), class: 'tp-fill' }, svg);
+      const col = mk('rect', { x, y: sy(YMAX), width: w, height: sy(0) - sy(YMAX), class: 'hit' }, svg);
+      col.onmousemove = e => showTip(e, `Machine ${names[i]}<br>share ${pc(v)} × defect rate ${pc(r[i], 1)}<br>= P(${names[i]} ∩ defect) = ${fmt(j[i], 4)}<br>${D ? pc(j[i] / D, 1) : '—'} of all defects`);
+      col.onmouseleave = hideTip;
+      txt(pc(r[i], 1), { x: x + w / 2, y: sy(r[i]) - 6, 'text-anchor': 'middle', class: 'bar-lbl' }, svg);
+      txt(`${names[i]} · ${pc(v)}`, { x: x + w / 2, y: H - 12, 'text-anchor': 'middle', class: 'lbl' }, svg);
+      x += w + GAP;
+    });
+    mk('line', { x1: L, x2: W - R, y1: sy(D), y2: sy(D), class: 'mean-line' }, svg);
+    const lab = `overall ${pc(D, 2)}`;
+    mk('rect', { x: W - R - lab.length * 7.4 - 14, y: sy(D) - 22, width: lab.length * 7.4 + 10, height: 18, rx: 4, class: 'ms-lblbg' }, svg);
+    txt(lab, { x: W - R - 8, y: sy(D) - 9, 'text-anchor': 'end', class: 'mean-lbl' }, svg);
+
+    document.getElementById('t5-res').innerHTML =
+      `P(defect) = ${s.map((v, i) => `${fmt(v, 2)} × ${fmt(r[i], 3)}`).join(' + ')} = ${j.map(v => fmt(v, 4)).join(' + ')} = <b>${fmt(D, 4)}</b>. ` +
+      `A plain average of the three rates would say ${pc((r[0] + r[1] + r[2]) / 3, 2)}.`;
+    document.getElementById('t5-p').textContent = `P(defect) = ${pc(D, 2)}`;
+    document.getElementById('t5-flip').textContent = D ? `P(C | defect) = ${fmt(j[2], 4)}/${fmt(D, 4)} = ${pc(j[2] / D, 1)}` : 'no defects at all';
+  }
+  ids.forEach(k => el[k].oninput = () => render(k));
+  tryIt.total = () => { [40, 40, 1, 2, 9].forEach((v, i) => el[ids[i]].value = v); render(); scrollToCard('t5-chart'); };
+  render();
+})();
+
+// =============== STAGE 5: Simpson's paradox ===============
+(() => {
+  const D = { A: { small: [81, 87], large: [192, 263] }, B: { small: [234, 270], large: [55, 80] } };
+  const all = t => [D[t].small[0] + D[t].large[0], D[t].small[1] + D[t].large[1]];
+  const chart = document.getElementById('s6-chart'), mix = document.getElementById('s6-mix');
+  const W = 640, H = 250, L = 46, R = 12, T = 16, B = 32;
+  chart.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  mix.setAttribute('viewBox', '0 0 640 96');
+  const sy = p => T + (1 - p) * (H - T - B);
+  let view = 'split';
+
+  function render() {
+    chart.innerHTML = '';
+    [0, 0.25, 0.5, 0.75, 1].forEach(p => {
+      mk('line', { x1: L, x2: W - R, y1: sy(p), y2: sy(p), class: 'grid' }, chart);
+      txt(pc(p), { x: L - 6, y: sy(p) + 4, 'text-anchor': 'end', class: 'lbl' }, chart);
+    });
+    const groups = view === 'split'
+      ? [['Small stones', D.A.small, D.B.small], ['Large stones', D.A.large, D.B.large]]
+      : [['All patients', all('A'), all('B')]];
+    const gw = (W - L - R) / groups.length, bw = Math.min(90, gw / 3.4);
+    groups.forEach(([name, a, b], gi) => {
+      const cx = L + gw * (gi + 0.5);
+      [[a, 'A', 'ms-top', -1], [b, 'B', 'ms-bot', 1]].forEach(([v, t, cls, side]) => {
+        const p = v[0] / v[1], x = cx + (side < 0 ? -bw - 6 : 6);
+        const r = mk('rect', { x, y: sy(p), width: bw, height: sy(0) - sy(p), rx: 3, class: cls }, chart);
+        r.onmousemove = e => showTip(e, `Treatment ${t}, ${name.toLowerCase()}<br>${v[0]} of ${v[1]} succeeded = ${pc(p, 1)}`);
+        r.onmouseleave = hideTip;
+        txt(pc(p, 1), { x: x + bw / 2, y: sy(p) - 18, 'text-anchor': 'middle', class: 'bar-lbl' }, chart);
+        txt(`${v[0]}/${v[1]}`, { x: x + bw / 2, y: sy(p) - 5, 'text-anchor': 'middle', class: 'lbl' }, chart);
+      });
+      txt(name, { x: cx, y: H - 10, 'text-anchor': 'middle', class: 'lbl' }, chart);
+    });
+
+    mix.innerHTML = '';
+    [['A', 10, 'ms-top'], ['B', 54, 'ms-bot']].forEach(([t, y, cls]) => {
+      txt('Treatment ' + t, { x: 0, y: y + 21, class: 'lbl' }, mix);
+      const s = D[t].small[1], l = D[t].large[1], n = s + l, X0 = 110, WW = 520;
+      const ws = WW * s / n;
+      mk('rect', { x: X0, y, width: ws - 2, height: 32, rx: 5, class: cls + ' ms-faint' }, mix);
+      mk('rect', { x: X0 + ws, y, width: WW - ws, height: 32, rx: 5, class: cls }, mix);
+      if (ws > 120) txt(`small ${s}`, { x: X0 + 10, y: y + 21, class: 'ms-txt' }, mix);
+      else txt(`${s}`, { x: X0 + 6, y: y + 21, class: 'ms-txt' }, mix);
+      if (WW - ws > 120) txt(`large ${l} (${pc(l / n)})`, { x: X0 + ws + 10, y: y + 21, class: 'ms-txt' }, mix);
+      else txt(`${l}`, { x: X0 + ws + 6, y: y + 21, class: 'ms-txt' }, mix);
+    });
+
+    document.getElementById('s6-res').innerHTML = view === 'split'
+      ? `Within each stone size, <b>A wins</b>: 93.1% vs 86.7% for small stones, 73.0% vs 68.8% for large ones.`
+      : `Combined, <b>B wins</b>: 82.6% vs 78.0%. That's because A took on most of the hard, large-stone cases (75% of its patients, against 23% of B's).`;
+  }
+  const setView = seg('s6-view', v => { view = v; render(); });
+  render();
+})();
+
+// =============== STAGE 5: map of the rules ===============
+(() => {
+  const svg = document.getElementById('fm'), info = document.getElementById('fm-info');
+  svg.setAttribute('viewBox', '0 0 640 340');
+  mk('defs', {}, svg).innerHTML =
+    '<marker id="fm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z"/></marker>' +
+    '<marker id="fm-arrow-on" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z"/></marker>';
+  const nodes = [
+    { x: 100, y: 60, label: 'Marginal', sub: 'P(A)', target: 'marginal', desc: 'One variable on its own: a row or column total divided by N. Add the joints across the other variable to get it.' },
+    { x: 320, y: 60, label: 'Joint', sub: 'P(A ∩ B)', target: 'joint', desc: 'Both at once: a single cell divided by N. Everything else on this map can be built from the joint table.' },
+    { x: 320, y: 175, label: 'Conditional', sub: 'P(A | B)', target: 'conditional', desc: 'Zoom into B: joint ÷ marginal. Multiply back by the marginal to recover the joint.' },
+    { x: 540, y: 175, label: 'Independence', sub: 'P(A∩B) = P(A)P(B)', target: 'independence', desc: 'When the conditional equals the marginal, the joint is just the product of the margins.' },
+    { x: 320, y: 290, label: 'Total probability', sub: 'Σ P(A|Bᵢ)P(Bᵢ)', target: 'total', desc: 'Weight each group\'s conditional by its size and add: a marginal rebuilt from conditionals.' },
+    { x: 100, y: 290, label: "Bayes' theorem", sub: 'P(B | A)', target: 'bayes.html', ext: true, desc: 'Flip a conditional: P(B | A) = P(A | B) P(B) / P(A), with P(A) from the law of total probability.' }
+  ];
+  const edges = [[1, 0, 'sum out'], [1, 2, '÷ marginal'], [2, 3, '= marginal?'], [2, 4, 'weight & add'], [4, 5, 'flip'], [0, 2, '']];
+  const NW = 150, NH = 52;
+  // point where the line from a towards b leaves a's box
+  const clip = (a, b) => {
+    const dx = b.x - a.x, dy = b.y - a.y, s = Math.min(dx ? (NW / 2 + 4) / Math.abs(dx) : Infinity, dy ? (NH / 2 + 4) / Math.abs(dy) : Infinity);
+    return [a.x + dx * s, a.y + dy * s];
+  };
+  let sel = -1;
+  const eEls = [], nEls = [];
+  edges.forEach(([f, t, lbl]) => {
+    const [x1, y1] = clip(nodes[f], nodes[t]), [x2, y2] = clip(nodes[t], nodes[f]);
+    const line = mk('line', { x1, y1, x2, y2, class: 'fm-edge', 'marker-end': 'url(#fm-arrow)' }, svg);
+    let lt = null;
+    if (lbl) {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, w = lbl.length * 6.9 + 10;
+      mk('rect', { x: mx - w / 2, y: my - 10, width: w, height: 18, rx: 4, class: 'fm-elbg' }, svg);
+      lt = txt(lbl, { x: mx, y: my + 4, 'text-anchor': 'middle', class: 'fm-elbl' }, svg);
+    }
+    eEls.push([line, lt, f, t]);
+  });
+  nodes.forEach((n, i) => {
+    const g = mk('g', { class: 'fm-node' + (n.ext ? ' ext' : ''), tabindex: 0 }, svg);
+    mk('rect', { x: n.x - NW / 2, y: n.y - NH / 2, width: NW, height: NH, rx: 10 }, g);
+    txt(n.label, { x: n.x, y: n.y - 3, 'text-anchor': 'middle' }, g);
+    txt(n.sub, { x: n.x, y: n.y + 15, 'text-anchor': 'middle', class: 's' }, g);
+    g.onclick = () => pick(i);
+    g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(i); } };
+    nEls.push(g);
+  });
+  function pick(i) {
+    sel = i;
+    nEls.forEach((g, k) => g.classList.toggle('on', k === i));
+    eEls.forEach(([line, lt, f, t]) => {
+      const on = f === i || t === i;
+      line.classList.toggle('on', on);
+      line.setAttribute('marker-end', on ? 'url(#fm-arrow-on)' : 'url(#fm-arrow)');
+      if (lt) lt.classList.toggle('on', on);
+    });
+    const n = nodes[i];
+    const href = n.ext ? n.target : '#' + n.target;
+    info.innerHTML = `<h4>${n.label}</h4><p style="margin:0 0 6px">${n.desc}</p>${n.ext ? '<span class="note">Bayes explainer: coming soon</span>' : `<a href="${href}">Go to section →</a>`}`;
+  }
+  pick(1);
+})();
+
+// ---------- worked-examples sidebars (one per stage) ----------
+(() => {
+  let open = null, opener = null;
+  const scrim = document.getElementById('tx-scrim');
+  const closePanel = (returnFocus = true) => {
+    if (!open) return;
+    open.classList.remove('on'); document.body.classList.remove('ex-open');
+    open = null;
+    if (returnFocus && opener) opener.focus();
+  };
+  const openPanel = btn => {
+    opener = btn; open = document.getElementById(btn.dataset.panel);
+    open.classList.add('on'); document.body.classList.add('ex-open');
+    open.querySelector('.ex-body').scrollTop = 0;
+    open.querySelector('.ex-close').focus();
+  };
+  document.querySelectorAll('.ex-fab[data-panel]').forEach(b => b.onclick = () => openPanel(b));
+  document.querySelectorAll('.ex-panel .ex-close').forEach(b => b.onclick = () => closePanel());
+  scrim.onclick = () => closePanel();
+  document.addEventListener('keydown', e => {
+    if (!open) return;
+    if (e.key === 'Escape') closePanel();
+    if (e.key === 'Tab') { // keep focus inside the open panel
+      const f = open.querySelectorAll('button'), first = f[0], lastF = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); lastF.focus(); }
+      else if (!e.shiftKey && document.activeElement === lastF) { e.preventDefault(); first.focus(); }
+    }
+  });
+  document.querySelectorAll('.ex-panel .ex-try').forEach(btn => btn.onclick = () => { closePanel(false); tryIt[btn.dataset.go](); });
+})();
+
+// ---------- nav highlight ----------
+(() => {
+  const links = [...document.querySelectorAll('nav a[href^="#"]')];
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-40% 0px -55% 0px' });
+  document.querySelectorAll('section').forEach(s => io.observe(s));
+})();
+</script>
+</body>
+</html>
